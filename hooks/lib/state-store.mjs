@@ -18,12 +18,13 @@ export async function readState(filePath) {
   }
 }
 
-export async function writeEvent(filePath, event, maxRecent = 10) {
+export async function writeEvent(filePath, event, maxRecent = 10, sound = undefined) {
   const state = await readState(filePath);
   const next = {
     ...state,
     current: event,
     recent: [event, ...state.recent].slice(0, maxRecent),
+    ...(sound === undefined ? {} : { sound }),
   };
 
   await mkdir(dirname(filePath), { recursive: true });
