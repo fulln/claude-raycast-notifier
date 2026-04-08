@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "test:hooks": "node --test hooks/tests/*.test.mjs",
-    "mock:needs-input": "node hooks/mock-event.mjs needs_input",
-    "mock:failure": "node hooks/mock-event.mjs failure",
-    "mock:done": "node hooks/mock-event.mjs done"
+    "mock:needs-input": "node hooks/mock-event.mjs needs_input | node hooks/claude-event-bridge.mjs",
+    "mock:failure": "node hooks/mock-event.mjs failure | node hooks/claude-event-bridge.mjs",
+    "mock:done": "node hooks/mock-event.mjs done | node hooks/claude-event-bridge.mjs"
   }
 }
