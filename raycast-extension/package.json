@@ -11,25 +11,25 @@
     {
       "name": "menu-bar-status",
       "title": "Claude Status",
-      "description": "Show Claude status and recent events in the Raycast menu bar",
+      "description": "Show Claude status, sound setup health, and recent events in the Raycast menu bar",
       "mode": "menu-bar"
     },
     {
       "name": "manage-sounds",
-      "title": "Manage Sounds",
-      "description": "Manage Claude hook sound mappings and imported sounds",
+      "title": "Manage Claude Sounds",
+      "description": "Assign sounds to Claude hook event slots",
       "mode": "view"
     },
     {
       "name": "sound-library",
-      "title": "Sound Library",
-      "description": "Browse the managed Claude hook sound library",
+      "title": "Claude Sound Library",
+      "description": "Preview bundled and imported Claude hook sounds",
       "mode": "view"
     },
     {
       "name": "notify-event",
       "title": "Notify Claude Event",
-      "description": "Render a Claude event as a Toast or HUD",
+      "description": "Render an actionable Claude event and return you to Claude Code",
       "mode": "no-view",
       "arguments": [
         {
@@ -54,7 +54,7 @@
     {
       "name": "notifierRootPath",
       "title": "Notifier Root Path",
-      "description": "Path to the shared Claude notifier data directory",
+      "description": "Directory containing sound-library.json, sound-mappings.json, and managed sound assets",
       "type": "textfield",
       "default": "~/.claude-raycast-notifier",
       "required": true
