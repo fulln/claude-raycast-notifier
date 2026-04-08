@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const manifestPath = new URL("../config/default-sound-pack.json", import.meta.url);
 const soundsDir = new URL("../raycast-extension/assets/sounds/", import.meta.url);
@@ -7,7 +8,7 @@ const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
 
 for (const sound of manifest.sounds) {
   const fileUrl = new URL(sound.filename, soundsDir);
-  await mkdir(dirname(fileUrl.pathname), { recursive: true });
+  await mkdir(dirname(fileURLToPath(fileUrl)), { recursive: true });
   await writeFile(
     fileUrl,
     createWavBuffer({
