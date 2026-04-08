@@ -1,0 +1,11 @@
+{
+  "name": "claude-raycast-notifier",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:hooks": "node --test hooks/tests/*.test.mjs",
+    "mock:needs-input": "node hooks/mock-event.mjs needs_input",
+    "mock:failure": "node hooks/mock-event.mjs failure",
+    "mock:done": "node hooks/mock-event.mjs done"
+  }
+}

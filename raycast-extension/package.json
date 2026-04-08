@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-raycast-notifier",
+  "title": "Claude Raycast Notifier",
+  "description": "Claude Code status in Raycast with notifications and voice.",
+  "author": "fulln",
+  "license": "MIT",
+  "categories": ["Developer Tools", "Productivity"],
+  "commands": [
+    {
+      "name": "menu-bar-status",
+      "title": "Claude Status",
+      "description": "Show Claude status and recent events in the Raycast menu bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "notify-event",
+      "title": "Notify Claude Event",
+      "description": "Render a Claude event as a Toast or HUD",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "stateFilePath",
+      "title": "State File Path",
+      "description": "Path to the shared Claude notifier state file",
+      "type": "textfield",
+      "default": "~/.claude-raycast-notifier/state.json",
+      "required": true
+    },
+    {
+      "name": "enableVoice",
+      "title": "Enable Voice",
+      "label": "Speak high-priority events",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.4",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build --skip-types -e dist -o dist",
+    "lint": "ray lint"
+  }
+}
