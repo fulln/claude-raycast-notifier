@@ -5,7 +5,7 @@ function defaultState() {
   return {
     current: null,
     recent: [],
-    voice: { lastSpokenAt: null, lastSpokenText: null },
+    sound: { lastPlayedAt: null, lastPlayedSoundId: null, lastSlot: null, lastError: null },
   };
 }
 
@@ -34,6 +34,14 @@ export async function writeEvent(filePath, event, maxRecent = 10) {
 export async function writeVoiceMeta(filePath, voice) {
   const state = await readState(filePath);
   const next = { ...state, voice };
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, JSON.stringify(next, null, 2));
+  return next;
+}
+
+export async function writeSoundMeta(filePath, sound) {
+  const state = await readState(filePath);
+  const next = { ...state, sound };
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, JSON.stringify(next, null, 2));
   return next;

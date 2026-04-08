@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { readState, writeEvent } from "../lib/state-store.mjs";
+import { readState, writeEvent, writeSoundMeta } from "../lib/state-store.mjs";
 
 test("writeEvent sets current and appends recent history", async () => {
   const dir = mkdtempSync(join(tmpdir(), "ccrn-state-"));
@@ -24,6 +24,35 @@ test("writeEvent sets current and appends recent history", async () => {
 
   assert.equal(state.current.type, "running");
   assert.equal(state.recent.length, 1);
+});
+
+test("writeSoundMeta stores the last played sound id and slot", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "ccrn-sound-"));
+  const filePath = join(dir, "state.json");
+
+  await writeEvent(
+    filePath,
+    {
+      type: "failure",
+      title: "Tests failed",
+      message: "Build error",
+      severity: "error",
+      soundSlot: "failure",
+      timestamp: new Date().toISOString(),
+    },
+  );
+
+  const lastPlayedAt = new Date().toISOString();
+  await writeSoundMeta(filePath, {
+    lastPlayedAt,
+    lastPlayedSoundId: "soft-alert",
+    lastSlot: "failure",
+    lastError: null,
+  });
+
+  const state = await readState(filePath);
+  assert.equal(state.sound.lastPlayedSoundId, "soft-alert");
+  assert.equal(state.sound.lastSlot, "failure");
 });
 
 test("writeEvent trims history to the configured max", async () => {
