@@ -127,16 +127,9 @@ export async function repairUserData(): Promise<{
   await fs.mkdir(paths.rootDir, { recursive: true });
   await fs.mkdir(paths.soundsDir, { recursive: true });
 
-  const manifest = await readJsonFile<DefaultSoundPack>(
-    defaultSoundPackPath(),
-    {
-      version: LIBRARY_VERSION,
-      sounds: [],
-      defaults: {},
-    },
-  );
+  const manifest = defaultSoundPack();
 
-  for (const sound of manifest.sounds ?? []) {
+  for (const sound of manifest.sounds) {
     const source = resolve(environment.assetsPath, "sounds", sound.filename);
     const destination = join(paths.soundsDir, sound.filename);
     if (!(await pathExists(destination)) && (await pathExists(source))) {
@@ -145,10 +138,16 @@ export async function repairUserData(): Promise<{
   }
 
   const existingLibrary = await loadSoundLibrary();
-  const importedSounds = existingLibrary.sounds.filter(
-    (sound) => sound.kind === "imported",
-  );
-  const bundledSounds = (manifest.sounds ?? []).map((sound) => ({
+  const importedSounds = [] as SoundLibraryEntry[];
+  for (const sound of existingLibrary.sounds.filter(
+    (entry) => entry.kind === "imported",
+  )) {
+    if (await pathExists(resolveManagedSoundPath(sound.filename))) {
+      importedSounds.push(sound);
+    }
+  }
+
+  const bundledSounds = manifest.sounds.map((sound) => ({
     id: sound.id,
     label: sound.label,
     kind: "bundled" as const,
@@ -156,28 +155,32 @@ export async function repairUserData(): Promise<{
     frequencyHz: sound.frequencyHz,
     durationMs: sound.durationMs,
   }));
+
   const library = normalizeLibrary({
     version: LIBRARY_VERSION,
     sounds: [...bundledSounds, ...importedSounds],
   });
   await writeJsonFile(paths.libraryFile, library);
 
-  if (!(await pathExists(paths.mappingsFile))) {
-    const mappings = normalizeMappings({
-      version: MAPPINGS_VERSION,
-      slots: Object.fromEntries(
-        SOUND_SLOTS.map((slot) => [
-          slot,
-          manifest.defaults?.[slot] ?? defaultMapping(),
-        ]),
-      ) as Record<SoundSlot, SoundMapping>,
-    });
-    await writeJsonFile(paths.mappingsFile, mappings);
-  }
+  const existingMappings = await loadSoundMappings();
+  const validSoundIds = new Set(library.sounds.map((sound) => sound.id));
+  const mappings = normalizeMappings({
+    version: MAPPINGS_VERSION,
+    slots: Object.fromEntries(
+      SOUND_SLOTS.map((slot) => {
+        const current = existingMappings.slots[slot];
+        if (current?.soundId && validSoundIds.has(current.soundId)) {
+          return [slot, current];
+        }
+        return [slot, manifest.defaults[slot] ?? defaultMapping()];
+      }),
+    ) as Record<SoundSlot, SoundMapping>,
+  });
+  await writeJsonFile(paths.mappingsFile, mappings);
 
   return {
-    library: await loadSoundLibrary(),
-    mappings: await loadSoundMappings(),
+    library,
+    mappings,
     status: await loadInstallStatus(),
   };
 }
@@ -330,14 +333,47 @@ function isSoundLibraryEntry(value: unknown): value is SoundLibraryEntry {
   );
 }
 
-function defaultSoundPackPath(): string {
-  return resolve(
-    environment.assetsPath,
-    "..",
-    "..",
-    "config",
-    "default-sound-pack.json",
-  );
+function defaultSoundPack(): DefaultSoundPack {
+  return {
+    version: LIBRARY_VERSION,
+    sounds: [
+      {
+        id: "focus-bell",
+        label: "Focus Bell",
+        filename: "focus-bell.wav",
+        frequencyHz: 880,
+        durationMs: 220,
+      },
+      {
+        id: "soft-alert",
+        label: "Soft Alert",
+        filename: "soft-alert.wav",
+        frequencyHz: 330,
+        durationMs: 320,
+      },
+      {
+        id: "gentle-finish",
+        label: "Gentle Finish",
+        filename: "gentle-finish.wav",
+        frequencyHz: 660,
+        durationMs: 260,
+      },
+      {
+        id: "bright-success",
+        label: "Bright Success",
+        filename: "bright-success.wav",
+        frequencyHz: 990,
+        durationMs: 180,
+      },
+    ],
+    defaults: {
+      needs_input: { soundId: "focus-bell", enabled: true },
+      failure: { soundId: "soft-alert", enabled: true },
+      done: { soundId: "gentle-finish", enabled: true },
+      success: { soundId: "bright-success", enabled: false },
+      running: { soundId: null, enabled: false },
+    },
+  };
 }
 
 type DefaultSoundPack = {
