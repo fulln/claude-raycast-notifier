@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/fulln/opensource/claude-raycast-notifier/hooks/claude-event-bridge.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}

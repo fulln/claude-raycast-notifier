@@ -47,6 +47,14 @@
       "type": "checkbox",
       "default": true,
       "required": false
+    },
+    {
+      "name": "successThresholdMs",
+      "title": "Success Threshold (ms)",
+      "description": "Only notify successful commands that exceed this duration",
+      "type": "textfield",
+      "default": "5000",
+      "required": true
     }
   ],
   "dependencies": {
