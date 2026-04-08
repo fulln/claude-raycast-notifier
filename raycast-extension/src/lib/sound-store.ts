@@ -197,6 +197,28 @@ export async function loadInstallStatus(): Promise<InstallStatus> {
     }
   }
 
+  if (missing.length === 0) {
+    const [library, mappings] = await Promise.all([
+      loadSoundLibrary(),
+      loadSoundMappings(),
+    ]);
+    const soundIds = new Set(library.sounds.map((sound) => sound.id));
+
+    for (const sound of library.sounds) {
+      const filePath = resolveManagedSoundPath(sound.filename);
+      if (!(await pathExists(filePath))) {
+        missing.push(filePath);
+      }
+    }
+
+    for (const slot of SOUND_SLOTS) {
+      const mapping = mappings.slots[slot];
+      if (mapping.soundId && !soundIds.has(mapping.soundId)) {
+        missing.push(`${paths.mappingsFile}#${slot}`);
+      }
+    }
+  }
+
   return {
     rootDir: paths.rootDir,
     missing,

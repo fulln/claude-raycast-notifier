@@ -112,10 +112,30 @@ export default function Command() {
                     />
                   ) : null}
                   <Action
-                    title={mapping?.enabled ? "Mute Slot" : "Enable Slot"}
-                    icon={mapping?.enabled ? Icon.SpeakerOff : Icon.SpeakerOn}
+                    title={
+                      mapping?.enabled
+                        ? "Mute Slot"
+                        : sound
+                          ? "Enable Slot"
+                          : "Choose Sound to Enable"
+                    }
+                    icon={
+                      mapping?.enabled
+                        ? Icon.SpeakerOff
+                        : sound
+                          ? Icon.SpeakerOn
+                          : Icon.Music
+                    }
                     onAction={async () => {
                       if (!data) return;
+
+                      if (!mapping?.enabled && !sound) {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Choose a sound before enabling this slot",
+                        });
+                        return;
+                      }
 
                       const updatedMappings = await saveSoundMappings({
                         ...data.mappings,

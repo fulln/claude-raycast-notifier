@@ -9,6 +9,7 @@ import {
   useNavigation,
   usePromise,
 } from "@raycast/api";
+import { basename } from "node:path";
 import type { ReactElement } from "react";
 import { useState } from "react";
 import type { SoundSlot } from "./lib/event";
@@ -189,12 +190,14 @@ function ImportSoundForm(props: {
 
               setIsSubmitting(true);
               try {
-                await importSoundFile(sourcePath, values.label);
+                const normalizedLabel =
+                  values.label.trim() || basename(sourcePath);
+                await importSoundFile(sourcePath, normalizedLabel);
                 await props.onImported();
                 await showToast({
                   style: Toast.Style.Success,
                   title: "Sound imported",
-                  message: values.label,
+                  message: normalizedLabel,
                 });
                 pop();
               } finally {
