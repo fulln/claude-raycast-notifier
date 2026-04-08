@@ -2,7 +2,12 @@ const type = process.argv[2] ?? "needs_input";
 
 const event = {
   needs_input: {
-    type: "needs_input",
+    hook_event_name: "Elicitation",
+    prompt: "Approve the command in Claude Code",
+    options: [
+      { value: "approve", label: "Approve" },
+      { value: "deny", label: "Deny" },
+    ],
     title: "Claude needs your input",
     message: "Approve the command in Claude Code",
   },
@@ -15,6 +20,11 @@ const event = {
     type: "done",
     title: "Claude finished the task",
     message: "Implementation and checks are complete",
+  },
+  success: {
+    type: "success",
+    title: "Claude completed the command",
+    message: "The command finished successfully",
   },
 }[type];
 
