@@ -6,7 +6,10 @@
   "icon": "icon.png",
   "author": "lee_fulln",
   "license": "MIT",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "commands": [
     {
       "name": "menu-bar-status",
@@ -61,7 +64,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.0"
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

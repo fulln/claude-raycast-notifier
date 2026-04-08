@@ -6,8 +6,8 @@ import {
   MenuBarExtra,
   openCommandPreferences,
   openExtensionPreferences,
-  usePromise,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { loadState } from "./lib/state";
 import { loadInstallStatus } from "./lib/sound-store";
 

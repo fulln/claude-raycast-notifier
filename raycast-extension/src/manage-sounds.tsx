@@ -6,8 +6,8 @@ import {
   List,
   Toast,
   showToast,
-  usePromise,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import type { SoundSlot } from "./lib/event";
 import {
   loadInstallStatus,

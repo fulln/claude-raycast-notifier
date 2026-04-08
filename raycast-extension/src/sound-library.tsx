@@ -7,8 +7,8 @@ import {
   Toast,
   showToast,
   useNavigation,
-  usePromise,
 } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { basename } from "node:path";
 import type { ReactElement } from "react";
 import { useState } from "react";
