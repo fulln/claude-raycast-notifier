@@ -312,6 +312,7 @@ function defaultSoundPackPath(): string {
   return resolve(
     environment.assetsPath,
     "..",
+    "..",
     "config",
     "default-sound-pack.json",
   );
