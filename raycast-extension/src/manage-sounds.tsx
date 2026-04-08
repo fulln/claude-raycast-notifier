@@ -58,11 +58,18 @@ export default function Command() {
                     style: Toast.Style.Animated,
                     title: "Repairing managed sound data",
                   });
-                  await repairUserData();
+                  const repaired = await repairUserData();
                   await revalidate();
                   await showToast({
-                    style: Toast.Style.Success,
-                    title: "Managed sound data repaired",
+                    style: repaired.status.healthy
+                      ? Toast.Style.Success
+                      : Toast.Style.Failure,
+                    title: repaired.status.healthy
+                      ? "Managed sound data repaired"
+                      : "Managed sound data still needs attention",
+                    message: repaired.status.healthy
+                      ? undefined
+                      : installHealthSubtitle(repaired.status.missing),
                   });
                 }}
               />

@@ -55,6 +55,11 @@ export type InstallStatus = {
   healthy: boolean;
 };
 
+type JsonReadResult<T> = {
+  value: T;
+  malformed: boolean;
+};
+
 export async function loadSoundLibrary(): Promise<SoundLibrary> {
   const { libraryFile } = notifierPaths();
   const parsed = await readJsonFile<Partial<SoundLibrary>>(libraryFile, {
@@ -62,7 +67,7 @@ export async function loadSoundLibrary(): Promise<SoundLibrary> {
     sounds: [],
   });
 
-  return normalizeLibrary(parsed);
+  return normalizeLibrary(parsed.value);
 }
 
 export async function loadSoundMappings(): Promise<SoundMappings> {
@@ -72,7 +77,7 @@ export async function loadSoundMappings(): Promise<SoundMappings> {
     slots: defaultMappings().slots,
   });
 
-  return normalizeMappings(parsed);
+  return normalizeMappings(parsed.value);
 }
 
 export async function saveSoundMappings(
@@ -201,10 +206,27 @@ export async function loadInstallStatus(): Promise<InstallStatus> {
   }
 
   if (missing.length === 0) {
-    const [library, mappings] = await Promise.all([
-      loadSoundLibrary(),
-      loadSoundMappings(),
+    const [libraryRead, mappingsRead] = await Promise.all([
+      readJsonFile<Partial<SoundLibrary>>(paths.libraryFile, {
+        version: LIBRARY_VERSION,
+        sounds: [],
+      }),
+      readJsonFile<Partial<SoundMappings>>(paths.mappingsFile, {
+        version: MAPPINGS_VERSION,
+        slots: defaultMappings().slots,
+      }),
     ]);
+
+    if (libraryRead.malformed) {
+      missing.push(`${paths.libraryFile}#malformed`);
+    }
+
+    if (mappingsRead.malformed) {
+      missing.push(`${paths.mappingsFile}#malformed`);
+    }
+
+    const library = normalizeLibrary(libraryRead.value);
+    const mappings = normalizeMappings(mappingsRead.value);
     const soundIds = new Set(library.sounds.map((sound) => sound.id));
 
     for (const sound of library.sounds) {
@@ -216,6 +238,10 @@ export async function loadInstallStatus(): Promise<InstallStatus> {
 
     for (const slot of SOUND_SLOTS) {
       const mapping = mappings.slots[slot];
+      if (mapping.enabled && !mapping.soundId) {
+        missing.push(`${paths.mappingsFile}#${slot}:unassigned-enabled`);
+        continue;
+      }
       if (mapping.soundId && !soundIds.has(mapping.soundId)) {
         missing.push(`${paths.mappingsFile}#${slot}`);
       }
@@ -259,12 +285,28 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-async function readJsonFile<T>(filePath: string, fallback: T): Promise<T> {
+async function readJsonFile<T>(
+  filePath: string,
+  fallback: T,
+): Promise<JsonReadResult<T>> {
   try {
     const raw = await fs.readFile(filePath, "utf8");
-    return JSON.parse(raw) as T;
+    try {
+      return {
+        value: JSON.parse(raw) as T,
+        malformed: false,
+      };
+    } catch {
+      return {
+        value: fallback,
+        malformed: true,
+      };
+    }
   } catch {
-    return fallback;
+    return {
+      value: fallback,
+      malformed: false,
+    };
   }
 }
 

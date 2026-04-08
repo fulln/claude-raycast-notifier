@@ -2,11 +2,33 @@
   "hooks": {
     "Notification": [
       {
-        "matcher": "*",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "node /Users/fulln/opensource/claude-raycast-notifier/hooks/claude-event-bridge.mjs"
+            "command": "node /Users/fulln/.claude/bin/claude-raycast-notifier/hooks/claude-event-bridge.mjs 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/fulln/.claude/bin/claude-raycast-notifier/hooks/claude-event-bridge.mjs 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Elicitation": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/fulln/.claude/bin/claude-raycast-notifier/hooks/claude-event-bridge.mjs 2>/dev/null || true"
           }
         ]
       }
