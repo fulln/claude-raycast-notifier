@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "sounds": [
+    {
+      "id": "focus-bell",
+      "label": "Focus Bell",
+      "kind": "bundled",
+      "filename": "focus-bell.wav",
+      "frequencyHz": 880,
+      "durationMs": 220
+    },
+    {
+      "id": "soft-alert",
+      "label": "Soft Alert",
+      "kind": "bundled",
+      "filename": "soft-alert.wav",
+      "frequencyHz": 330,
+      "durationMs": 320
+    },
+    {
+      "id": "gentle-finish",
+      "label": "Gentle Finish",
+      "kind": "bundled",
+      "filename": "gentle-finish.wav",
+      "frequencyHz": 660,
+      "durationMs": 260
+    },
+    {
+      "id": "bright-success",
+      "label": "Bright Success",
+      "kind": "bundled",
+      "filename": "bright-success.wav",
+      "frequencyHz": 990,
+      "durationMs": 180
+    }
+  ],
+  "defaults": {
+    "needs_input": {
+      "soundId": "focus-bell",
+      "enabled": true
+    },
+    "failure": {
+      "soundId": "soft-alert",
+      "enabled": true
+    },
+    "done": {
+      "soundId": "gentle-finish",
+      "enabled": true
+    },
+    "success": {
+      "soundId": "bright-success",
+      "enabled": false
+    },
+    "running": {
+      "soundId": null,
+      "enabled": false
+    }
+  }
+}
