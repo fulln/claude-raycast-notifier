@@ -3,7 +3,8 @@
   "name": "claude-raycast-notifier",
   "title": "Claude Raycast Notifier",
   "description": "Claude Code status in Raycast with notifications and voice.",
-  "author": "fulln",
+  "icon": "icon.png",
+  "author": "lee_fulln",
   "license": "MIT",
   "categories": ["Developer Tools", "Productivity"],
   "commands": [
@@ -17,7 +18,16 @@
       "name": "notify-event",
       "title": "Notify Claude Event",
       "description": "Render a Claude event as a Toast or HUD",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "payload",
+          "description": "Base64 encoded event payload",
+          "type": "text",
+          "placeholder": "Base64 event payload",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -32,6 +42,7 @@
     {
       "name": "enableVoice",
       "title": "Enable Voice",
+      "description": "Speak high-priority events",
       "label": "Speak high-priority events",
       "type": "checkbox",
       "default": true,
