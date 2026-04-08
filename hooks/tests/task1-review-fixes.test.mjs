@@ -14,11 +14,11 @@ test("generate-default-sounds converts file URLs with fileURLToPath", async () =
   assert.doesNotMatch(source, /dirname\(fileUrl\.pathname\)/);
 });
 
-test("mock:success reuses the supported done event", async () => {
+test("mock:success uses the supported success event", async () => {
   const packageJson = JSON.parse(await readFile(new URL("package.json", repoRoot), "utf8"));
 
   assert.equal(
     packageJson.scripts["mock:success"],
-    "node hooks/mock-event.mjs done | node hooks/claude-event-bridge.mjs",
+    "node hooks/mock-event.mjs success | node hooks/claude-event-bridge.mjs",
   );
 });

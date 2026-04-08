@@ -8,6 +8,6 @@
     "mock:needs-input": "node hooks/mock-event.mjs needs_input | node hooks/claude-event-bridge.mjs",
     "mock:failure": "node hooks/mock-event.mjs failure | node hooks/claude-event-bridge.mjs",
     "mock:done": "node hooks/mock-event.mjs done | node hooks/claude-event-bridge.mjs",
-    "mock:success": "node hooks/mock-event.mjs done | node hooks/claude-event-bridge.mjs"
+    "mock:success": "node hooks/mock-event.mjs success | node hooks/claude-event-bridge.mjs"
   }
 }
