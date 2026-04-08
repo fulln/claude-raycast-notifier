@@ -1,15 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, cpSync, mkdirSync } from "node:fs";
+import { mkdtempSync } from "node:fs";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readFile, access } from "node:fs/promises";
+import { access } from "node:fs/promises";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "..", "..");
 
-// Import the module under test — will throw if missing (intentional for TDD)
 const {
   notifierPaths,
   ensureUserData,
@@ -20,13 +20,13 @@ const {
   getInstallStatus,
 } = await import("../lib/sound-config.mjs");
 
-// ---------------------------------------------------------------------------
-// helpers
-// ---------------------------------------------------------------------------
-
 function tempRoot() {
   return mkdtempSync(join(tmpdir(), "ccrn-snd-"));
 }
+
+// Shared fixture paths
+const bundledSoundsDir = join(repoRoot, "raycast-extension", "assets", "sounds");
+const manifestFile = join(repoRoot, "config", "default-sound-pack.json");
 
 // ---------------------------------------------------------------------------
 // notifierPaths
@@ -36,10 +36,11 @@ test("notifierPaths returns expected sub-paths under the given root", () => {
   const root = "/tmp/test-root";
   const paths = notifierPaths(root);
 
-  assert.equal(paths.root, root);
+  assert.equal(paths.rootDir, root);
   assert.equal(paths.soundsDir, join(root, "sounds"));
-  assert.equal(paths.soundLibrary, join(root, "sound-library.json"));
-  assert.equal(paths.soundMappings, join(root, "sound-mappings.json"));
+  assert.equal(paths.stateFile, join(root, "state.json"));
+  assert.equal(paths.libraryFile, join(root, "sound-library.json"));
+  assert.equal(paths.mappingsFile, join(root, "sound-mappings.json"));
 });
 
 // ---------------------------------------------------------------------------
@@ -48,125 +49,82 @@ test("notifierPaths returns expected sub-paths under the given root", () => {
 
 test("ensureUserData creates directory structure on first run", async () => {
   const root = tempRoot();
-
-  const bundledSoundsDir = join(repoRoot, "raycast-extension", "assets", "sounds");
-  const manifestFile = join(repoRoot, "config", "default-sound-pack.json");
-
   await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
 
-  // sound library JSON exists
-  await assert.doesNotReject(
-    access(join(root, "sound-library.json")),
-    "sound-library.json should exist",
-  );
-
-  // sound mappings JSON exists
-  await assert.doesNotReject(
-    access(join(root, "sound-mappings.json")),
-    "sound-mappings.json should exist",
-  );
-
-  // sounds directory exists
-  await assert.doesNotReject(
-    access(join(root, "sounds")),
-    "sounds/ directory should exist",
-  );
+  await assert.doesNotReject(access(join(root, "sound-library.json")));
+  await assert.doesNotReject(access(join(root, "sound-mappings.json")));
+  await assert.doesNotReject(access(join(root, "sounds")));
 });
 
-test("ensureUserData seeds bundled sounds into the sounds directory", async () => {
+test("ensureUserData seeds bundled sounds and default mappings", async () => {
   const root = tempRoot();
-
-  const bundledSoundsDir = join(repoRoot, "raycast-extension", "assets", "sounds");
-  const manifestFile = join(repoRoot, "config", "default-sound-pack.json");
-
   await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
 
-  // at least one bundled wav copied
-  await assert.doesNotReject(
-    access(join(root, "sounds", "focus-bell.wav")),
-    "focus-bell.wav should be copied",
-  );
-});
+  await assert.doesNotReject(access(join(root, "sounds", "focus-bell.wav")));
 
-test("ensureUserData seeds default mappings from manifest", async () => {
-  const root = tempRoot();
+  const library = await readSoundLibrary(root);
+  assert.ok(Array.isArray(library.sounds), "library.sounds should be an array");
+  assert.ok(library.sounds.length > 0, "library should have at least one entry");
+  assert.equal(library.sounds[0].kind, "bundled");
 
-  const bundledSoundsDir = join(repoRoot, "raycast-extension", "assets", "sounds");
-  const manifestFile = join(repoRoot, "config", "default-sound-pack.json");
-
-  await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
-
-  const mappingsRaw = await readFile(join(root, "sound-mappings.json"), "utf8");
-  const mappings = JSON.parse(mappingsRaw);
-
-  // must contain the fixed slot set
+  const mappings = await readSoundMappings(root);
   for (const slot of ["needs_input", "failure", "done", "success", "running"]) {
-    assert.ok(Object.hasOwn(mappings, slot), `mappings should have slot '${slot}'`);
+    assert.ok(mappings.slots[slot] !== undefined, `mappings.slots should have slot '${slot}'`);
   }
-});
-
-test("ensureUserData seeds sound library with bundled entries", async () => {
-  const root = tempRoot();
-
-  const bundledSoundsDir = join(repoRoot, "raycast-extension", "assets", "sounds");
-  const manifestFile = join(repoRoot, "config", "default-sound-pack.json");
-
-  await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
-
-  const libraryRaw = await readFile(join(root, "sound-library.json"), "utf8");
-  const library = JSON.parse(libraryRaw);
-
-  assert.ok(Array.isArray(library), "library should be an array");
-  assert.ok(library.length > 0, "library should have at least one entry");
-  assert.ok(
-    library.every((e) => e.id && e.filename),
-    "each library entry must have id and filename",
-  );
+  assert.equal(mappings.slots.needs_input.soundId, "focus-bell");
+  assert.equal(mappings.slots.needs_input.enabled, true);
 });
 
 test("ensureUserData is idempotent — re-running does not overwrite existing mappings", async () => {
   const root = tempRoot();
-
-  const bundledSoundsDir = join(repoRoot, "raycast-extension", "assets", "sounds");
-  const manifestFile = join(repoRoot, "config", "default-sound-pack.json");
-
   await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
 
-  // mutate mappings
+  // Mutate mappings
   const mappingsPath = join(root, "sound-mappings.json");
-  const mappings = JSON.parse(await readFile(mappingsPath, "utf8"));
-  mappings.done.enabled = false;
-  await (await import("node:fs/promises")).writeFile(
-    mappingsPath,
-    JSON.stringify(mappings, null, 2),
-  );
+  const raw = JSON.parse(await readFile(mappingsPath, "utf8"));
+  raw.slots.done.enabled = false;
+  await writeFile(mappingsPath, JSON.stringify(raw, null, 2));
 
-  // re-run ensureUserData
+  // Re-run
   await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
 
   const after = JSON.parse(await readFile(mappingsPath, "utf8"));
-  assert.equal(after.done.enabled, false, "existing user mappings should not be overwritten");
+  assert.equal(after.slots.done.enabled, false, "existing user mappings should not be overwritten");
+});
+
+test("ensureUserData returns { paths, library, mappings }", async () => {
+  const root = tempRoot();
+  const result = await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
+
+  assert.ok(result.paths?.soundsDir, "result.paths.soundsDir should be set");
+  assert.ok(Array.isArray(result.library?.sounds), "result.library.sounds should be array");
+  assert.ok(result.mappings?.slots?.needs_input, "result.mappings.slots.needs_input should exist");
 });
 
 // ---------------------------------------------------------------------------
 // readSoundLibrary / readSoundMappings / writeSoundMappings
 // ---------------------------------------------------------------------------
 
-test("readSoundLibrary returns empty array when file is missing", async () => {
+test("readSoundLibrary returns { version: 1, sounds: [] } when file is missing", async () => {
   const root = tempRoot();
   const library = await readSoundLibrary(root);
-  assert.deepEqual(library, []);
+  assert.deepEqual(library, { version: 1, sounds: [] });
 });
 
-test("readSoundMappings returns empty object when file is missing", async () => {
+test("readSoundMappings returns versioned slots fallback when file is missing", async () => {
   const root = tempRoot();
   const mappings = await readSoundMappings(root);
-  assert.deepEqual(mappings, {});
+  assert.equal(mappings.version, 1);
+  for (const slot of ["needs_input", "failure", "done", "success", "running"]) {
+    assert.ok(mappings.slots[slot] !== undefined, `missing slot ${slot}`);
+    assert.equal(mappings.slots[slot].soundId, null);
+    assert.equal(mappings.slots[slot].enabled, false);
+  }
 });
 
 test("writeSoundMappings persists and readSoundMappings retrieves", async () => {
   const root = tempRoot();
-  const data = { done: { soundId: "focus-bell", enabled: true } };
+  const data = { version: 1, slots: { done: { soundId: "focus-bell", enabled: true } } };
 
   await writeSoundMappings(root, data);
   const result = await readSoundMappings(root);
@@ -178,63 +136,51 @@ test("writeSoundMappings persists and readSoundMappings retrieves", async () => 
 // importSound
 // ---------------------------------------------------------------------------
 
-test("importSound copies a file into the managed sounds directory", async () => {
+test("importSound copies a custom file into the managed sound library", async () => {
   const root = tempRoot();
-
-  const bundledSoundsDir = join(repoRoot, "raycast-extension", "assets", "sounds");
-  const manifestFile = join(repoRoot, "config", "default-sound-pack.json");
   await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
 
-  // use one of the bundled wavs as the "custom" source
   const sourceFile = join(bundledSoundsDir, "bright-success.wav");
   const entry = await importSound(sourceFile, "My Custom Sound", { rootDir: root });
 
-  assert.ok(entry.id, "entry should have an id");
+  assert.equal(entry.kind, "imported");
   assert.equal(entry.label, "My Custom Sound");
-  assert.equal(entry.kind, "custom");
+  assert.ok(entry.id.startsWith("imported-"), "id should have imported- prefix");
   assert.ok(entry.filename, "entry should have a filename");
+  assert.equal(entry.originalName, "bright-success.wav");
 
-  // file should exist in the managed sounds directory
-  await assert.doesNotReject(
-    access(join(root, "sounds", entry.filename)),
-    "imported file should exist in sounds/",
-  );
+  await assert.doesNotReject(access(join(root, "sounds", entry.filename)));
 });
 
 test("importSound records entry in sound-library.json", async () => {
   const root = tempRoot();
-
-  const bundledSoundsDir = join(repoRoot, "raycast-extension", "assets", "sounds");
-  const manifestFile = join(repoRoot, "config", "default-sound-pack.json");
   await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
 
   const sourceFile = join(bundledSoundsDir, "soft-alert.wav");
   const entry = await importSound(sourceFile, "Imported Alert", { rootDir: root });
 
   const library = await readSoundLibrary(root);
-  const found = library.find((e) => e.id === entry.id);
-  assert.ok(found, "imported entry should appear in sound-library.json");
+  assert.equal(library.sounds.at(-1).label, "Imported Alert");
+  assert.ok(library.sounds.find((e) => e.id === entry.id), "entry should appear in library.sounds");
 });
 
 // ---------------------------------------------------------------------------
 // getInstallStatus
 // ---------------------------------------------------------------------------
 
-test("getInstallStatus reports not installed when root is missing", async () => {
+test("getInstallStatus reports unhealthy when root is missing", async () => {
   const root = join(tempRoot(), "nonexistent-subdir");
   const status = await getInstallStatus(root);
-  assert.equal(status.installed, false);
+  assert.equal(status.healthy, false);
+  assert.ok(status.missing.length > 0, "should report missing paths");
+  assert.equal(status.rootDir, root);
 });
 
-test("getInstallStatus reports installed after ensureUserData", async () => {
+test("getInstallStatus reports healthy after ensureUserData", async () => {
   const root = tempRoot();
-
-  const bundledSoundsDir = join(repoRoot, "raycast-extension", "assets", "sounds");
-  const manifestFile = join(repoRoot, "config", "default-sound-pack.json");
   await ensureUserData({ rootDir: root, manifestFile, bundledSoundsDir });
 
   const status = await getInstallStatus(root);
-  assert.equal(status.installed, true);
-  assert.ok(status.soundCount >= 0);
-  assert.ok(status.mappingCount >= 0);
+  assert.equal(status.healthy, true);
+  assert.deepEqual(status.missing, []);
 });

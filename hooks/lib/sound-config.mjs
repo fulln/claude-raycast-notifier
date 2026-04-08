@@ -65,10 +65,11 @@ export function defaultRootDir() {
  */
 export function notifierPaths(rootDir = defaultRootDir()) {
   return {
-    root: rootDir,
+    rootDir,
     soundsDir: join(rootDir, "sounds"),
-    soundLibrary: join(rootDir, "sound-library.json"),
-    soundMappings: join(rootDir, "sound-mappings.json"),
+    stateFile: join(rootDir, "state.json"),
+    libraryFile: join(rootDir, "sound-library.json"),
+    mappingsFile: join(rootDir, "sound-mappings.json"),
   };
 }
 
@@ -101,8 +102,8 @@ async function writeJsonFile(filePath, data) {
  * @returns {Promise<Array>}
  */
 export async function readSoundLibrary(rootDir = defaultRootDir()) {
-  const { soundLibrary } = notifierPaths(rootDir);
-  return readJsonFile(soundLibrary, []);
+  const { libraryFile } = notifierPaths(rootDir);
+  return readJsonFile(libraryFile, { version: 1, sounds: [] });
 }
 
 /**
@@ -112,8 +113,17 @@ export async function readSoundLibrary(rootDir = defaultRootDir()) {
  * @returns {Promise<object>}
  */
 export async function readSoundMappings(rootDir = defaultRootDir()) {
-  const { soundMappings } = notifierPaths(rootDir);
-  return readJsonFile(soundMappings, {});
+  const { mappingsFile } = notifierPaths(rootDir);
+  return readJsonFile(mappingsFile, {
+    version: 1,
+    slots: {
+      needs_input: { soundId: null, enabled: false },
+      failure: { soundId: null, enabled: false },
+      done: { soundId: null, enabled: false },
+      success: { soundId: null, enabled: false },
+      running: { soundId: null, enabled: false },
+    },
+  });
 }
 
 /**
@@ -123,8 +133,8 @@ export async function readSoundMappings(rootDir = defaultRootDir()) {
  * @param {object} mappings
  */
 export async function writeSoundMappings(rootDir, mappings) {
-  const { soundMappings } = notifierPaths(rootDir);
-  await writeJsonFile(soundMappings, mappings);
+  const { mappingsFile } = notifierPaths(rootDir);
+  await writeJsonFile(mappingsFile, mappings);
 }
 
 // ---------------------------------------------------------------------------
@@ -170,46 +180,30 @@ export async function ensureUserData({
     }
   }
 
-  // 4. Write sound-library.json — merge missing bundled entries, never remove customs
-  const existingLibrary = await readSoundLibrary(rootDir);
-  const existingIds = new Set(existingLibrary.map((e) => e.id));
-  let libraryChanged = false;
-
-  for (const sound of manifest.sounds) {
-    if (!existingIds.has(sound.id)) {
-      existingLibrary.push({
-        id: sound.id,
-        label: sound.label,
-        kind: "bundled",
-        filename: sound.filename,
-      });
-      libraryChanged = true;
-    }
-  }
-
-  if (libraryChanged || existingLibrary.length === 0) {
-    await writeJsonFile(paths.soundLibrary, existingLibrary);
-  } else {
-    // ensure the file exists even if nothing changed
-    const fileExists = await access(paths.soundLibrary).then(() => true).catch(() => false);
-    if (!fileExists) {
-      await writeJsonFile(paths.soundLibrary, existingLibrary);
-    }
-  }
+  // 4. Write sound-library.json — merge missing bundled entries, preserve imports
+  const existingLib = await readSoundLibrary(rootDir);
+  const existingIds = new Set(existingLib.sounds.map((e) => e.id));
+  const newBundled = manifest.sounds
+    .filter((s) => !existingIds.has(s.id))
+    .map(({ id, label, filename }) => ({ id, label, kind: "bundled", filename }));
+  const mergedSounds = [...manifest.sounds.map(({ id, label, filename }) => ({ id, label, kind: "bundled", filename })), ...existingLib.sounds.filter((e) => e.kind === "imported")];
+  await writeJsonFile(paths.libraryFile, { version: 1, sounds: mergedSounds });
 
   // 5. Write sound-mappings.json only if it doesn't already exist (preserve user edits)
-  const mappingsExist = await access(paths.soundMappings).then(() => true).catch(() => false);
+  const mappingsExist = await access(paths.mappingsFile).then(() => true).catch(() => false);
   if (!mappingsExist) {
-    // Build default mappings ensuring all slots are present
-    const defaultMappings = {};
+    const slots = {};
     for (const slot of SLOTS) {
-      defaultMappings[slot] = manifest.defaults?.[slot] ?? {
-        soundId: null,
-        enabled: false,
-      };
+      slots[slot] = manifest.defaults?.[slot] ?? { soundId: null, enabled: false };
     }
-    await writeJsonFile(paths.soundMappings, defaultMappings);
+    await writeJsonFile(paths.mappingsFile, { version: 1, slots });
   }
+
+  return {
+    paths,
+    library: await readSoundLibrary(rootDir),
+    mappings: await readSoundMappings(rootDir),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -236,19 +230,21 @@ export async function importSound(
   // Ensure sounds directory exists
   await mkdir(paths.soundsDir, { recursive: true });
 
-  const id = randomUUID();
+  const id = `imported-${randomUUID()}`;
   const ext = extname(sourceFile) || ".wav";
-  const filename = `custom-${id}${ext}`;
+  const filename = `${randomUUID()}${ext}`;
   const dest = join(paths.soundsDir, filename);
 
   await copyFile(sourceFile, dest);
 
-  const entry = { id, label, kind: "custom", filename };
+  const entry = { id, label, kind: "imported", filename, originalName: basename(sourceFile) };
 
   // Append to library
   const library = await readSoundLibrary(rootDir);
-  library.push(entry);
-  await writeJsonFile(paths.soundLibrary, library);
+  await writeJsonFile(paths.libraryFile, {
+    version: library.version,
+    sounds: [...library.sounds, entry],
+  });
 
   return entry;
 }
@@ -264,26 +260,20 @@ export async function importSound(
  * @returns {Promise<{installed: boolean, soundCount: number, mappingCount: number}>}
  */
 export async function getInstallStatus(rootDir = defaultRootDir()) {
-  const paths = notifierPaths(rootDir);
+  const { libraryFile, mappingsFile, soundsDir } = notifierPaths(rootDir);
+  const missing = [];
 
-  const rootExists = await access(paths.root).then(() => true).catch(() => false);
-  if (!rootExists) {
-    return { installed: false, soundCount: 0, mappingCount: 0 };
+  for (const file of [libraryFile, mappingsFile, soundsDir]) {
+    try {
+      await access(file);
+    } catch {
+      missing.push(file);
+    }
   }
-
-  const libraryExists = await access(paths.soundLibrary).then(() => true).catch(() => false);
-  const mappingsExist = await access(paths.soundMappings).then(() => true).catch(() => false);
-
-  if (!libraryExists || !mappingsExist) {
-    return { installed: false, soundCount: 0, mappingCount: 0 };
-  }
-
-  const library = await readSoundLibrary(rootDir);
-  const mappings = await readSoundMappings(rootDir);
 
   return {
-    installed: true,
-    soundCount: library.length,
-    mappingCount: Object.keys(mappings).length,
+    rootDir,
+    missing,
+    healthy: missing.length === 0,
   };
 }
