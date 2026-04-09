@@ -22,11 +22,46 @@ if [ -f "${GEMINI_SETTINGS}" ]; then
   echo "Backed up existing Gemini settings"
 fi
 
-sed "s|/Users/fulln/.claude/bin/claude-raycast-notifier|${REPO_ROOT}|g" \
-  "${REPO_ROOT}/config/claude-hooks.example.json" > "${CLAUDE_SETTINGS}"
+merge_settings() {
+  local target_path="$1"
+  local template_path="$2"
 
-sed "s|/Users/fulln/.claude/bin/claude-raycast-notifier|${REPO_ROOT}|g" \
-  "${REPO_ROOT}/config/gemini-settings.example.json" > "${GEMINI_SETTINGS}"
+  TARGET_PATH="${target_path}" TEMPLATE_PATH="${template_path}" REPO_ROOT="${REPO_ROOT}" node <<'NODE'
+const fs = require("fs");
+
+const targetPath = process.env.TARGET_PATH;
+const templatePath = process.env.TEMPLATE_PATH;
+const repoRoot = process.env.REPO_ROOT;
+
+function readJson(path, fallback) {
+  try {
+    return JSON.parse(fs.readFileSync(path, "utf8"));
+  } catch {
+    return fallback;
+  }
+}
+
+const current = readJson(targetPath, {});
+const templateRaw = fs
+  .readFileSync(templatePath, "utf8")
+  .replaceAll("/Users/fulln/.claude/bin/claude-raycast-notifier", repoRoot);
+const template = JSON.parse(templateRaw);
+
+const merged = {
+  ...current,
+  ...template,
+  hooks: {
+    ...(current.hooks ?? {}),
+    ...(template.hooks ?? {}),
+  },
+};
+
+fs.writeFileSync(targetPath, JSON.stringify(merged, null, 2) + "\n");
+NODE
+}
+
+merge_settings "${CLAUDE_SETTINGS}" "${REPO_ROOT}/config/claude-hooks.example.json"
+merge_settings "${GEMINI_SETTINGS}" "${REPO_ROOT}/config/gemini-settings.example.json"
 
 echo "Installed Claude hook config to ${CLAUDE_SETTINGS}"
 echo "Installed Gemini hook config to ${GEMINI_SETTINGS}"

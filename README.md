@@ -29,7 +29,7 @@ What this does:
 - downloads the latest release bundle
 - installs it into `~/.ai-hook-notifier`
 - backs up your current Claude and Gemini settings
-- writes Claude and Gemini hook configs
+- merges Claude and Gemini hook configs into your existing settings
 - installs the Raycast extension dependencies
 
 Then start the extension:
