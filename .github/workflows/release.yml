@@ -1,0 +1,53 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: npm
+          cache-dependency-path: raycast-extension/package-lock.json
+
+      - name: Install Raycast extension dependencies
+        run: npm ci
+        working-directory: raycast-extension
+
+      - name: Run hook tests
+        run: npm run test:hooks
+
+      - name: Lint Raycast extension
+        run: npm run lint:extension
+
+      - name: Build Raycast extension
+        run: npm run build:extension
+
+      - name: Package release artifact
+        run: |
+          mkdir -p releases
+          cd raycast-extension/dist
+          zip -qr "../../releases/claude-raycast-notifier-${{ github.ref_name }}.zip" .
+
+      - name: Build release notes from changelog
+        run: node scripts/changelog-release-body.mjs "${{ github.ref_name }}" > release-notes.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: release-notes.md
+          files: releases/claude-raycast-notifier-${{ github.ref_name }}.zip

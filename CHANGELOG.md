@@ -13,4 +13,3 @@ All notable releases for this repository are recorded here.
 - Version bump from 0.2.0 to 0.2.1
 - Bundle the user's default Claude sounds into the extension assets
 - Release artifact: `releases/claude-raycast-notifier-v0.2.1.zip`
-

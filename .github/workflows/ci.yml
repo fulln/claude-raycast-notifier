@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: macos-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+          cache: npm
+          cache-dependency-path: raycast-extension/package-lock.json
+
+      - name: Install Raycast extension dependencies
+        run: npm ci
+        working-directory: raycast-extension
+
+      - name: Run hook tests
+        run: npm run test:hooks
+
+      - name: Lint Raycast extension
+        run: npm run lint:extension
+
+      - name: Build Raycast extension
+        run: npm run build:extension
