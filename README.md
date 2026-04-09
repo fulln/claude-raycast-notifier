@@ -21,6 +21,11 @@ not expose a stable external hook surface that this project can target.
 
 ## Install
 
+There are two supported install paths:
+
+- `Script install`: installs hook config automatically and is the fastest way to get the full workflow
+- `Raycast Store / direct extension install`: installs the UI first, then requires one in-app `Setup Hooks` step
+
 Requirements:
 
 - Node.js and `npm`
@@ -31,6 +36,8 @@ Platform support:
 - Linux: hook-only install; Raycast UI is skipped
 - Native Windows: not supported by the installer
 - Raycast app is required only for the macOS UI experience
+
+### Script Install
 
 One-command install:
 
@@ -53,12 +60,6 @@ On macOS with Raycast installed:
 1. Run `Manage Hook Sounds`
 2. Confirm `Needs Input` and `Done` are configured
 
-If you install the Raycast extension directly instead of using the bootstrap
-script, run `Setup Hooks` once from Raycast. That command checks
-`~/.claude/settings.json` and `~/.gemini/settings.json`, copies the bundled hook
-runtime into `~/.claude-raycast-notifier/generated-hooks`, and writes the
-required hook entries for Claude and Gemini.
-
 On Linux or macOS without Raycast:
 
 - the hook bridge still works
@@ -75,6 +76,28 @@ If you ever need to start the extension again manually:
 cd ~/.ai-hook-notifier/raycast-extension
 npm run dev -- --non-interactive --exit-on-error
 ```
+
+### Raycast Store Or Direct Extension Install
+
+If you install the extension from Raycast instead of using the bootstrap
+script, the extension UI will be available immediately, but hooks are not active
+yet.
+
+After installing the extension:
+
+1. Open Raycast
+2. Run `Setup Hooks`
+3. Install `Claude Hooks`, `Gemini Hooks`, or `Install All Hooks`
+
+`Setup Hooks` will:
+
+- check `~/.claude/settings.json`
+- check `~/.gemini/settings.json`
+- copy the bundled hook runtime into `~/.claude-raycast-notifier/generated-hooks`
+- merge the required hook entries for Claude and Gemini
+
+Without that step, the extension can open its commands, but Claude / Gemini
+will not automatically send notifications or questions into Raycast.
 
 <details>
 <summary>AI-Friendly Install Prompt</summary>

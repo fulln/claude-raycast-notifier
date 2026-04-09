@@ -40,6 +40,11 @@ You can change them at any time from `Manage Hook Sounds`.
 
 ## Setup
 
+There are two supported setup paths:
+
+- `Shell installer`: configures hooks automatically
+- `Raycast install only`: requires one extra `Setup Hooks` step inside Raycast
+
 ### Quick Install
 
 Requirements:
@@ -72,6 +77,9 @@ installer, run `Setup Hooks` once. It copies the bundled hook runtime into
 
 - `~/.claude/settings.json`
 - `~/.gemini/settings.json`
+
+Without `Setup Hooks`, the extension commands are installed, but Claude and
+Gemini will not automatically route hook events or questions into Raycast.
 
 If you ever need to start it manually:
 
