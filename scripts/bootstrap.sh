@@ -20,7 +20,7 @@ need_cmd() {
 
 need_cmd curl
 need_cmd bash
-need_cmd npm
+need_cmd node
 need_cmd unzip
 
 echo "Downloading install bundle from latest release"
@@ -37,5 +37,5 @@ unzip -q "${TMP_DIR}/bundle.zip" -d "${INSTALL_DIR}"
 
 echo
 echo "Bootstrap complete."
-echo "Raycast should open automatically."
-echo "If it does not, open Raycast and run: Manage Hook Sounds"
+echo "If Raycast is installed, the extension will be started automatically."
+echo "If Raycast is not installed, hooks are still active and the installer prints the config paths."

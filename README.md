@@ -39,14 +39,19 @@ This will:
 - download the latest release bundle
 - install it into `~/.ai-hook-notifier`
 - back up and merge Claude / Gemini hook settings
-- install Raycast extension dependencies
-- start the extension in the background
-- open Raycast
+- enable voice notifications immediately through Claude / Gemini hooks
+- detect Raycast and set up visual sound management only when Raycast is installed
 
-After Raycast opens:
+If Raycast is installed:
 
 1. Run `Manage Hook Sounds`
 2. Confirm `Needs Input` and `Done` are configured
+
+If Raycast is not installed:
+
+- voice notifications still work
+- the installer prints the exact Claude / Gemini config paths it updated
+- managed sound data lives under `~/.claude-raycast-notifier`
 
 If you ever need to start the extension again manually:
 
