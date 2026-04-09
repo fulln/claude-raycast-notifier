@@ -13,8 +13,11 @@ Today this repository supports:
 
 - Claude Code
 - Gemini CLI
+- GitHub Copilot (`Done` only)
 
 It intentionally does not ship Codex integration until Codex exposes native hooks.
+It also does not currently ship Antigravity integration because Antigravity does
+not expose a stable external hook surface that this project can target.
 
 ## Install
 
@@ -94,11 +97,24 @@ Mapping:
 - `Notification` -> `Needs Input`
 - `AfterAgent` -> `Done`
 
+### GitHub Copilot
+
+Copilot has official hooks, but they are session-oriented.
+
+If you want to configure them manually, use:
+- [config/copilot-hooks.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/copilot-hooks.example.json)
+
+Mapping:
+- `sessionEnd` with `reason: complete` -> `Done`
+
+Current limitation:
+- Copilot does not expose a first-class `Needs Input` hook in the documented hook surface, so this repository only maps `Done`
+
 ## What it does
 
 - Plays a sound when the AI needs your input
 - Plays a sound when the AI finishes
-- Opens a compact Raycast notification command
+- Shows a compact macOS notification
 - Keeps the notification content minimal: provider + `Needs Input` / `Done`
 
 ## Raycast commands

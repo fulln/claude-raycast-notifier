@@ -1,12 +1,13 @@
 # Provider Setup
 
-This repository now supports a shared hook bridge for Claude and Gemini,
+This repository now supports a shared hook bridge for Claude, Gemini, and
+GitHub Copilot,
 but the integration surface is not identical across providers.
 
 ## Supported attention moments
 
-- `needs_input`: play sound and foreground Raycast when user attention is needed
-- `done`: play sound and foreground Raycast when the run completes
+- `needs_input`: play sound when user attention is needed
+- `done`: play sound when the run completes
 
 The Raycast UI manages these as hook-level mappings, not as a generic sound
 library.
@@ -46,6 +47,36 @@ Notes:
 - Hook commands receive JSON on `stdin`
 - Hook commands must emit only JSON on `stdout`
 
+## GitHub Copilot
+
+GitHub Copilot now has official hooks for both cloud agent and CLI workflows.
+The current hook surface is session/tool oriented, not semantic in the same
+way as Claude and Gemini.
+
+Use
+[config/copilot-hooks.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/copilot-hooks.example.json)
+as the starting point.
+
+This example wires:
+
+- `sessionEnd` with `reason: complete` -> `done` via [hooks/copilot-session-end-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/copilot-session-end-bridge.mjs)
+
+Notes:
+
+- Copilot loads hook config from `.github/hooks/*.json` on the default branch for cloud agent
+- Copilot CLI also loads hooks from the current working directory
+- There is no first-class `needs_input` hook today, so this repository only maps Copilot `done`
+
+## Antigravity
+
+Antigravity is not wired right now.
+
+As verified locally on April 9, 2026, the installed Antigravity app exposes
+agent permissions and auto-approval settings, but I did not find a documented
+or local user-configurable shell hook surface equivalent to Claude, Gemini, or
+GitHub Copilot hooks. Until that exists, this repository does not advertise
+Antigravity support.
+
 ## Codex CLI
 
 Codex support is intentionally not shipped right now.
@@ -61,3 +92,4 @@ repository does not wire Codex events into the shared notifier flow.
 - Gemini wrapper: [hooks/gemini-event-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/gemini-event-bridge.mjs)
 - Gemini notification bridge: [hooks/gemini-notification-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/gemini-notification-bridge.mjs)
 - Gemini completion bridge: [hooks/gemini-after-agent-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/gemini-after-agent-bridge.mjs)
+- Copilot completion bridge: [hooks/copilot-session-end-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/copilot-session-end-bridge.mjs)

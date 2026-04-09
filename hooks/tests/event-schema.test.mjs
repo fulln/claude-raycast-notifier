@@ -86,6 +86,23 @@ test("normalizeEvent supports explicit gemini source and returnUrl", () => {
   assert.equal(shouldOpenRaycast(event), false);
 });
 
+test("normalizeEvent maps Copilot session completion to done", () => {
+  const event = normalizeEvent(
+    {
+      source: "copilot",
+      hook_event_name: "sessionEnd",
+      reason: "complete",
+    },
+    {},
+  );
+
+  assert.equal(event.source, "copilot");
+  assert.equal(event.type, "done");
+  assert.equal(event.hookKey, "copilot:sessionend");
+  assert.equal(event.returnUrl, null);
+  assert.equal(shouldNotifyEvent(event), true);
+});
+
 test("normalizeEvent maps failure payloads to the failure sound slot", () => {
   const event = normalizeEvent({ type: "failure", title: "Tests failed" }, {});
 

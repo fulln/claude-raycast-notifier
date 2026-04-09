@@ -9,6 +9,7 @@ const DEFAULT_SEVERITY = {
 const DEFAULT_RETURN_URLS = {
   claude: "claude://",
   gemini: null,
+  copilot: null,
 };
 
 const ATTENTION_TYPES = new Set(["needs_input", "done"]);
@@ -93,8 +94,11 @@ function deriveReturnUrl(raw, env, source) {
 
 function inferType(raw, env) {
   const hookEventName = deriveHookEventName(raw, env);
+  const copilotReason = raw.reason ?? env.AI_NOTIFIER_REASON;
   if (hookEventName === "Elicitation") return "needs_input";
   if (hookEventName === "Stop") return "done";
+  if (hookEventName === "sessionEnd" && copilotReason === "complete") return "done";
+  if (hookEventName === "sessionEnd" && copilotReason === "error") return "failure";
   return "running";
 }
 
