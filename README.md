@@ -93,3 +93,20 @@ GitHub automation:
 - CI runs on pushes to `main` and pull requests
 - GitHub Release runs when a `v*.*.*` tag is pushed
 - The workflow rebuilds the extension and uploads a zip artifact
+
+## Raycast Store
+
+Public store publishing stays semi-automatic because Raycast's official flow is:
+
+- run `npm run publish` inside the extension directory
+- authenticate with GitHub
+- let Raycast open or update a PR in `raycast/extensions`
+- wait for Raycast review and merge
+
+This repository wraps that as:
+
+```bash
+npm run publish:store
+```
+
+That command is local on purpose. It is not wired to GitHub Actions because the public store flow still depends on Raycast's publish CLI and review process.

@@ -1,7 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-raycast-notifier",
-  "version": "0.2.1",
   "title": "AI Hook Notifier",
   "description": "Claude and Gemini events in Raycast with sounds and focused notifications.",
   "icon": "icon.png",
@@ -67,6 +66,7 @@
   "scripts": {
     "dev": "ray develop",
     "build": "ray build --skip-types -e dist -o dist",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

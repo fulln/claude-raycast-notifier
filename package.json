@@ -8,6 +8,7 @@
     "test:hooks": "node --test hooks/tests/*.test.mjs",
     "lint:extension": "npm --prefix raycast-extension run lint",
     "build:extension": "npm --prefix raycast-extension run build",
+    "publish:store": "npm --prefix raycast-extension run publish",
     "release": "node scripts/release.mjs",
     "release:tag": "node scripts/release-tag.mjs",
     "mock:needs-input": "node hooks/mock-event.mjs needs_input | node hooks/claude-event-bridge.mjs",

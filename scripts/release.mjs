@@ -12,7 +12,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const repoRoot = resolve(__dirname, "..");
 const rootPackagePath = join(repoRoot, "package.json");
-const extensionPackagePath = join(repoRoot, "raycast-extension", "package.json");
 const changelogPath = join(repoRoot, "CHANGELOG.md");
 const releasesDir = join(repoRoot, "releases");
 const extensionDistDir = join(repoRoot, "raycast-extension", "dist");
@@ -21,8 +20,7 @@ const [, , requestedVersion = "patch", ...noteArgs] = process.argv;
 
 async function main() {
   const rootPackage = await readJson(rootPackagePath);
-  const extensionPackage = await readJson(extensionPackagePath);
-  const currentVersion = rootPackage.version ?? extensionPackage.version ?? "0.1.0";
+  const currentVersion = rootPackage.version ?? "0.1.0";
   const nextVersion = resolveVersion(currentVersion, requestedVersion);
   const notes = noteArgs.join(" ").trim();
 
@@ -31,10 +29,8 @@ async function main() {
   }
 
   rootPackage.version = nextVersion;
-  extensionPackage.version = nextVersion;
 
   await writeJson(rootPackagePath, rootPackage);
-  await writeJson(extensionPackagePath, extensionPackage);
 
   try {
     await run("npm", ["run", "test:hooks"], repoRoot);
@@ -42,10 +38,6 @@ async function main() {
     await run("npm", ["run", "build:extension"], repoRoot);
   } catch (error) {
     await writeJson(rootPackagePath, { ...rootPackage, version: currentVersion });
-    await writeJson(extensionPackagePath, {
-      ...extensionPackage,
-      version: currentVersion,
-    });
     throw error;
   }
 
