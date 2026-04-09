@@ -42,8 +42,14 @@ You can change them at any time from `Manage Hook Sounds`.
 
 Requirements:
 
-- Raycast app already installed
 - Node.js and `npm`
+- macOS with Raycast for the full extension experience
+
+Platform behavior:
+
+- macOS: full install, including Raycast startup
+- Linux: hook-only install; the extension is not started
+- Native Windows: unsupported by the installer
 
 Install with:
 
@@ -54,8 +60,9 @@ curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/
 This downloads a small bootstrap script, then downloads the latest install bundle release and installs it into `~/.ai-hook-notifier`.
 It also backs up your current Claude and Gemini settings, then merges in the required hook entries.
 
-If Raycast is installed, the installer also starts the extension for you.
-If Raycast is not installed, voice notifications still work and the installer prints the updated config paths.
+On macOS, if Raycast is installed, the installer also starts the extension for you.
+On Linux, the installer stops after hook setup and skips Raycast startup.
+On native Windows, the installer exits before downloading the bundle.
 
 If you ever need to start it manually:
 
@@ -95,6 +102,7 @@ Example config:
 
 ## Notes
 
+- The installer is macOS-first because Raycast is a macOS app. Linux is hook-only and native Windows is unsupported.
 - Codex is intentionally not wired yet because it does not currently expose stable native hooks for this flow.
 - Antigravity is intentionally not wired yet because it does not currently expose a stable external shell hook surface for this flow.
 - The extension stores managed sound data under `~/.claude-raycast-notifier` by default.

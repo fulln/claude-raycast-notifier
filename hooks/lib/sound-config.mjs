@@ -67,6 +67,8 @@ export function notifierPaths(rootDir = defaultRootDir()) {
   return {
     rootDir,
     soundsDir: join(rootDir, "sounds"),
+    requestsDir: join(rootDir, "requests"),
+    responsesDir: join(rootDir, "responses"),
     stateFile: join(rootDir, "state.json"),
     libraryFile: join(rootDir, "sound-library.json"),
     mappingsFile: join(rootDir, "sound-mappings.json"),

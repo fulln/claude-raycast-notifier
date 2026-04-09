@@ -1,5 +1,19 @@
 {
   "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "ask_user",
+        "hooks": [
+          {
+            "name": "ai-notifier-gemini-ask-user",
+            "type": "command",
+            "command": "node /Users/fulln/.claude/bin/claude-raycast-notifier/hooks/gemini-ask-user-bridge.mjs",
+            "timeout": 300000,
+            "description": "Route Gemini ask_user prompts through Raycast and feed the response back through hooks."
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "*",

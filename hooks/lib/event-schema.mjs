@@ -7,7 +7,7 @@ const DEFAULT_SEVERITY = {
 };
 
 const DEFAULT_RETURN_URLS = {
-  claude: "claude://",
+  claude: null,
   gemini: null,
   copilot: null,
 };

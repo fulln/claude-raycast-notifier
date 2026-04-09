@@ -26,6 +26,42 @@ const event = {
     title: "Claude completed the command",
     message: "The command finished successfully",
   },
+  ask_user_question: {
+    tool_name: "AskUserQuestion",
+    session_id: "mock-session",
+    tool_use_id: "mock-tool-use",
+    tool_input: {
+      prompt: "Choose a deployment target",
+      questions: [
+        {
+          question: "Where should Claude deploy?",
+          choices: ["staging", "production"],
+        },
+      ],
+    },
+  },
+  gemini_ask_user: {
+    tool_name: "ask_user",
+    session_id: "gemini-session",
+    tool_use_id: "gemini-tool-use",
+    tool_input: {
+      prompt: "Where should Gemini deploy?",
+      title: "Deployment Target",
+      type: "choice",
+      options: [
+        {
+          value: "staging",
+          label: "staging",
+          description: "Safer preview environment",
+        },
+        {
+          value: "production",
+          label: "production",
+          description: "Live user traffic",
+        },
+      ],
+    },
+  },
 }[type];
 
 if (!event) {

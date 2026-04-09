@@ -1,7 +1,14 @@
 import { runEventBridge } from "./ai-event-bridge.mjs";
+import { buildGeminiAskUserRetryOutput } from "./lib/gemini-ask-user-after-agent.mjs";
 
 const raw = await readStdin();
 const afterAgent = raw ? JSON.parse(raw) : {};
+const retryOutput = await buildGeminiAskUserRetryOutput(afterAgent);
+
+if (retryOutput) {
+  process.stdout.write(JSON.stringify(retryOutput));
+  process.exit(0);
+}
 
 await runEventBridge({
   source: "gemini",
@@ -20,7 +27,9 @@ function summarize(value) {
   }
 
   const normalized = value.replace(/\s+/g, " ").trim();
-  return normalized.length > 140 ? `${normalized.slice(0, 137)}...` : normalized;
+  return normalized.length > 140
+    ? `${normalized.slice(0, 137)}...`
+    : normalized;
 }
 
 async function readStdin() {
