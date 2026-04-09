@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Icon,
   List,
+  open,
   openCommandPreferences,
 } from "@raycast/api";
 import { basename } from "node:path";
@@ -36,6 +37,15 @@ export default function Command() {
                 title="Refresh"
                 icon={Icon.ArrowClockwise}
                 onAction={() => revalidate()}
+              />
+              <Action
+                title="Setup Hooks"
+                icon={Icon.WrenchScrewdriver}
+                onAction={() =>
+                  open(
+                    "raycast://extensions/lee_fulln/claude-raycast-notifier/setup-hooks",
+                  )
+                }
               />
               <Action
                 title="Open Preferences"

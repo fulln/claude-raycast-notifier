@@ -24,6 +24,8 @@ Current semantic notifications:
 
 - `Manage Hook Sounds`
   Configure the two semantic sounds: `Needs Input` and `Done`
+- `Setup Hooks`
+  Check Claude / Gemini hook health and install hook config directly from Raycast
 - `Notify AI Event`
   Internal callback command used by the hook bridge scripts
 
@@ -64,6 +66,13 @@ On macOS, if Raycast is installed, the installer also starts the extension for y
 On Linux, the installer stops after hook setup and skips Raycast startup.
 On native Windows, the installer exits before downloading the bundle.
 
+If you install the extension directly from Raycast instead of using the shell
+installer, run `Setup Hooks` once. It copies the bundled hook runtime into
+`~/.claude-raycast-notifier/generated-hooks` and updates:
+
+- `~/.claude/settings.json`
+- `~/.gemini/settings.json`
+
 If you ever need to start it manually:
 
 ```bash
@@ -79,6 +88,7 @@ Configure Claude hooks so:
 - `Stop` maps to `Done`
 
 Example config:
+
 - `../config/claude-hooks.example.json`
 
 ### Gemini CLI
@@ -89,6 +99,7 @@ Configure Gemini hooks so:
 - `AfterAgent` maps to `Done`
 
 Example config:
+
 - `../config/gemini-settings.example.json`
 
 ### GitHub Copilot
@@ -98,6 +109,7 @@ Configure Copilot hooks so:
 - `sessionEnd` with `reason: complete` maps to `Done`
 
 Example config:
+
 - `../config/copilot-hooks.example.json`
 
 ## Notes

@@ -18,6 +18,12 @@
       "mode": "view"
     },
     {
+      "name": "setup-hooks",
+      "title": "Setup Hooks",
+      "description": "Check Claude and Gemini hook health and install hook config from Raycast",
+      "mode": "view"
+    },
+    {
       "name": "notify-event",
       "title": "Notify AI Event",
       "description": "Render an actionable AI event and return you to the source app",

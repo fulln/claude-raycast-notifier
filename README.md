@@ -53,6 +53,12 @@ On macOS with Raycast installed:
 1. Run `Manage Hook Sounds`
 2. Confirm `Needs Input` and `Done` are configured
 
+If you install the Raycast extension directly instead of using the bootstrap
+script, run `Setup Hooks` once from Raycast. That command checks
+`~/.claude/settings.json` and `~/.gemini/settings.json`, copies the bundled hook
+runtime into `~/.claude-raycast-notifier/generated-hooks`, and writes the
+required hook entries for Claude and Gemini.
+
 On Linux or macOS without Raycast:
 
 - the hook bridge still works
@@ -156,6 +162,7 @@ Current limitation:
 ## Raycast commands
 
 - `Manage Hook Sounds`: configure the two semantic sounds
+- `Setup Hooks`: check Claude / Gemini hook health and install hook config from Raycast
 - `Notify AI Event`: internal callback command used by the hook bridges
 - `Answer Claude Question`: internal callback command used by the Claude `AskUserQuestion` hook bridge
 
