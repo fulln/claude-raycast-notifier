@@ -57,6 +57,19 @@ jobs:
           cd raycast-extension/dist
           zip -qr "../../releases/claude-raycast-notifier-${{ steps.version.outputs.tag }}.zip" .
 
+      - name: Package install bundle
+        run: |
+          rm -rf bundle
+          mkdir -p bundle
+          cp README.md bundle/README.md
+          mkdir -p bundle/config bundle/hooks bundle/raycast-extension bundle/scripts
+          cp -R config/. bundle/config/
+          cp -R hooks/. bundle/hooks/
+          cp scripts/install.sh bundle/scripts/install.sh
+          rsync -a --exclude node_modules --exclude raycast-env.d.ts raycast-extension/ bundle/raycast-extension/
+          cd bundle
+          zip -qr "../releases/ai-hook-notifier-bundle-${{ steps.version.outputs.tag }}.zip" .
+
       - name: Build release notes
         run: node scripts/release-notes.mjs "${{ github.event.before }}" "${{ github.sha }}" "${{ steps.version.outputs.tag }}" > release-notes.md
 
@@ -71,4 +84,6 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag }}
           name: ${{ steps.version.outputs.tag }}
           body_path: release-notes.md
-          files: releases/claude-raycast-notifier-${{ steps.version.outputs.tag }}.zip
+          files: |
+            releases/claude-raycast-notifier-${{ steps.version.outputs.tag }}.zip
+            releases/ai-hook-notifier-bundle-${{ steps.version.outputs.tag }}.zip

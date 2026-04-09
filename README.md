@@ -30,6 +30,37 @@ It intentionally does not ship Codex integration until Codex exposes native hook
 
 ## Setup
 
+### One-Command Install
+
+Remote bootstrap:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
+```
+
+This downloads the latest release bundle into `~/.ai-hook-notifier` by default, then runs the local installer.
+
+If you already cloned the repository yourself, use:
+
+```bash
+./scripts/install.sh
+```
+
+This will:
+
+- install `raycast-extension` dependencies
+- back up existing Claude and Gemini settings
+- write hook configs that point at your local checkout
+
+After that, start the extension:
+
+```bash
+cd raycast-extension
+ray develop
+```
+
+### Manual Install
+
 ### 1. Install the Raycast extension locally
 
 ```bash
@@ -105,3 +136,12 @@ npm run publish:store
 ```
 
 That command is local on purpose. It is not wired to GitHub Actions because the public store flow still depends on Raycast's publish CLI and review process.
+
+## Release Assets
+
+Each GitHub Release now publishes:
+
+- `claude-raycast-notifier-vYYYY.M.N.zip`
+  The built Raycast extension artifact
+- `ai-hook-notifier-bundle-vYYYY.M.N.zip`
+  A full install bundle with hooks, config, installer scripts, and the Raycast extension

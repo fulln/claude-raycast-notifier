@@ -37,6 +37,29 @@ You can change them at any time from `Manage Hook Sounds`.
 
 ## Setup
 
+### Quick Install
+
+Remote bootstrap from the repository root:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
+```
+
+This downloads the latest install bundle release and installs it into `~/.ai-hook-notifier`.
+
+Or, if you already cloned the repository:
+
+```bash
+./scripts/install.sh
+```
+
+Then start the extension:
+
+```bash
+cd raycast-extension
+ray develop
+```
+
 ### Claude Code
 
 Configure Claude hooks so:
