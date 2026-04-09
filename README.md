@@ -16,6 +16,68 @@ Today this repository supports:
 
 It intentionally does not ship Codex integration until Codex exposes native hooks.
 
+## Install
+
+### Fastest Install
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
+```
+
+What this does:
+
+- downloads the latest release bundle
+- installs it into `~/.ai-hook-notifier`
+- backs up your current Claude and Gemini settings
+- writes Claude and Gemini hook configs
+- installs the Raycast extension dependencies
+
+Then start the extension:
+
+```bash
+cd ~/.ai-hook-notifier/raycast-extension
+ray develop
+```
+
+After Raycast opens:
+
+1. Run `Manage Hook Sounds`
+2. Confirm the defaults are:
+   - `Needs Input -> Claude Ready To Work`
+   - `Done -> Claude Jobs Done`
+
+### If You Already Downloaded the Bundle or Repo
+
+```bash
+./scripts/install.sh
+cd raycast-extension
+ray develop
+```
+
+## Provider Setup
+
+### Claude Code
+
+The installer writes Claude hooks automatically.
+
+If you want to configure them manually, use:
+- [config/claude-hooks.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/claude-hooks.example.json)
+
+Mapping:
+- `Elicitation` -> `Needs Input`
+- `Stop` -> `Done`
+
+### Gemini CLI
+
+The installer writes Gemini hooks automatically.
+
+If you want to configure them manually, use:
+- [config/gemini-settings.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/gemini-settings.example.json)
+
+Mapping:
+- `Notification` -> `Needs Input`
+- `AfterAgent` -> `Done`
+
 ## What it does
 
 - Plays a sound when the AI needs your input
@@ -28,66 +90,7 @@ It intentionally does not ship Codex integration until Codex exposes native hook
 - `Manage Hook Sounds`: configure the two semantic sounds
 - `Notify AI Event`: internal callback command used by the hook bridges
 
-## Setup
-
-### One-Command Install
-
-Remote bootstrap:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
-```
-
-This downloads the latest release bundle into `~/.ai-hook-notifier` by default, then runs the local installer.
-
-If you already cloned the repository yourself, use:
-
-```bash
-./scripts/install.sh
-```
-
-This will:
-
-- install `raycast-extension` dependencies
-- back up existing Claude and Gemini settings
-- write hook configs that point at your local checkout
-
-After that, start the extension:
-
-```bash
-cd raycast-extension
-ray develop
-```
-
-### Manual Install
-
-### 1. Install the Raycast extension locally
-
-```bash
-cd raycast-extension
-npm install
-ray develop
-```
-
-### 2. Configure Claude hooks
-
-Use [config/claude-hooks.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/claude-hooks.example.json) as the template for `~/.claude/settings.json`.
-
-Hook mapping:
-
-- `Elicitation` -> `Needs Input`
-- `Stop` -> `Done`
-
-### 3. Configure Gemini hooks
-
-Use [config/gemini-settings.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/gemini-settings.example.json) as the template for `~/.gemini/settings.json`.
-
-Hook mapping:
-
-- `Notification` -> `Needs Input`
-- `AfterAgent` -> `Done`
-
-### 4. Choose sounds
+## Sounds
 
 Open `Manage Hook Sounds` in Raycast and set:
 
@@ -104,7 +107,7 @@ The repository now bundles the default Claude sounds:
 Run the checks locally:
 
 ```bash
-npm run test:hooks
+npm test
 npm --prefix raycast-extension run lint
 npm --prefix raycast-extension run build
 ```
