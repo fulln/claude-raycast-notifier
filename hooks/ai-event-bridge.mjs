@@ -2,6 +2,7 @@ import {
   normalizeEvent,
   shouldNotifyEvent,
 } from "./lib/event-schema.mjs";
+import { compactEvent } from "./lib/event-summary.mjs";
 import { writeEvent } from "./lib/state-store.mjs";
 import { triggerRaycast } from "./lib/raycast-deeplink.mjs";
 import { showMacNotification } from "./lib/fallback-notifier.mjs";
@@ -39,13 +40,14 @@ export async function runEventBridge({
     source ? { ...raw, source } : raw,
     source ? { ...process.env, AI_NOTIFIER_SOURCE: source } : process.env,
   );
+  const displayEvent = compactEvent(event);
 
-  const shouldNotify = shouldNotifyEvent(event);
+  const shouldNotify = shouldNotifyEvent(displayEvent);
   const playback = shouldNotify
-    ? await playSoundForEvent(event, { rootDir: paths.rootDir })
+    ? await playSoundForEvent(displayEvent, { rootDir: paths.rootDir })
     : {
-        slot: event.soundSlot ?? event.type ?? "running",
-        hookKey: event.hookKey ?? null,
+        slot: displayEvent.soundSlot ?? displayEvent.type ?? "running",
+        hookKey: displayEvent.hookKey ?? null,
         soundId: null,
         filePath: null,
         reason: "skipped",
@@ -54,18 +56,18 @@ export async function runEventBridge({
         error: null,
       };
 
-  const state = await writeEvent(resolvedStateFile, event, maxRecent, {
+  const state = await writeEvent(resolvedStateFile, displayEvent, maxRecent, {
     lastPlayedAt: playback.played ? playback.playedAt : null,
     lastPlayedSoundId: playback.played ? playback.soundId : null,
-    lastSlot: playback.slot ?? event.soundSlot ?? null,
+    lastSlot: playback.slot ?? displayEvent.soundSlot ?? null,
     lastError: playback.error ?? playback.reason,
   });
 
   if (shouldNotify) {
     try {
-      await triggerRaycast(event);
+      await triggerRaycast(displayEvent);
     } catch {
-      await showMacNotification(event.title, event.message);
+      await showMacNotification(displayEvent.title, displayEvent.message);
     }
   }
 
