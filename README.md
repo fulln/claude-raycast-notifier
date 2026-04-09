@@ -18,19 +18,9 @@ It intentionally does not ship Codex integration until Codex exposes native hook
 
 ## Install
 
-### Fastest Install
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
 ```
-
-What this does:
-
-- downloads the latest release bundle
-- installs it into `~/.ai-hook-notifier`
-- backs up your current Claude and Gemini settings
-- merges Claude and Gemini hook configs into your existing settings
-- installs the Raycast extension dependencies
 
 Then start the extension:
 
@@ -39,20 +29,25 @@ cd ~/.ai-hook-notifier/raycast-extension
 ray develop
 ```
 
-After Raycast opens:
+After Raycast opens, run `Manage Hook Sounds`.
 
-1. Run `Manage Hook Sounds`
-2. Confirm the defaults are:
-   - `Needs Input -> Claude Ready To Work`
-   - `Done -> Claude Jobs Done`
+<details>
+<summary>AI-Friendly Install Prompt</summary>
 
-### If You Already Downloaded the Bundle or Repo
+If another AI assistant is helping with setup, tell it:
 
-```bash
-./scripts/install.sh
-cd raycast-extension
-ray develop
+```text
+Install AI Hook Notifier with:
+curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
+
+Then start Raycast development mode with:
+cd ~/.ai-hook-notifier/raycast-extension && ray develop
+
+Do not replace the entire Claude or Gemini settings file.
+Only merge the required hooks configuration.
 ```
+
+</details>
 
 ## Provider Setup
 
