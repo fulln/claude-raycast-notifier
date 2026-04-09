@@ -1,6 +1,13 @@
 # AI Hook Notifier
 
+[![Downloads](https://img.shields.io/github/downloads/fulln/claude-raycast-notifier/total?style=flat-square&label=downloads)](https://github.com/fulln/claude-raycast-notifier/releases)
+[![Raycast Extension](https://img.shields.io/badge/Raycast-Extension-FF6363?style=flat-square&logo=raycast&logoColor=white)](https://www.raycast.com/)
+[![GitHub Stars](https://img.shields.io/github/stars/fulln/claude-raycast-notifier?style=flat-square&label=stars)](https://github.com/fulln/claude-raycast-notifier/stargazers)
+
 Raycast-based sound and notification bridge for AI CLI hooks.
+
+The public product name is `AI Hook Notifier`.
+The repository slug still uses the older `claude-raycast-notifier` name for compatibility with the current Raycast extension id and existing deeplink wiring.
 
 Today this repository supports:
 
