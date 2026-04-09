@@ -33,7 +33,7 @@ curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/
 This will:
 
 - download a small bootstrap script
-- resolve the latest release bundle
+- download the latest release bundle
 - install it into `~/.ai-hook-notifier`
 - back up and merge Claude / Gemini hook settings
 - install Raycast extension dependencies

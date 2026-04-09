@@ -69,6 +69,7 @@ jobs:
           rsync -a --exclude node_modules --exclude raycast-env.d.ts raycast-extension/ bundle/raycast-extension/
           cd bundle
           zip -qr "../releases/ai-hook-notifier-bundle-${{ steps.version.outputs.tag }}.zip" .
+          cp "../releases/ai-hook-notifier-bundle-${{ steps.version.outputs.tag }}.zip" "../releases/ai-hook-notifier-bundle-latest.zip"
 
       - name: Build release notes
         run: node scripts/release-notes.mjs "${{ github.event.before }}" "${{ github.sha }}" "${{ steps.version.outputs.tag }}" > release-notes.md
@@ -87,3 +88,4 @@ jobs:
           files: |
             releases/claude-raycast-notifier-${{ steps.version.outputs.tag }}.zip
             releases/ai-hook-notifier-bundle-${{ steps.version.outputs.tag }}.zip
+            releases/ai-hook-notifier-bundle-latest.zip
