@@ -69,9 +69,25 @@ echo "Installed Gemini hook config to ${GEMINI_SETTINGS}"
 cd "${REPO_ROOT}/raycast-extension"
 npm install
 
+LOG_DIR="${HOME}/.claude-raycast-notifier"
+LOG_FILE="${LOG_DIR}/raycast-develop.log"
+mkdir -p "${LOG_DIR}"
+
+if pgrep -f "ray develop --non-interactive --exit-on-error" >/dev/null 2>&1; then
+  echo "Raycast develop session already running"
+else
+  nohup npm run dev -- --non-interactive --exit-on-error >"${LOG_FILE}" 2>&1 &
+  echo "Started Raycast develop session in background"
+  echo "Log file: ${LOG_FILE}"
+fi
+
+if command -v open >/dev/null 2>&1; then
+  open -a Raycast || true
+fi
+
 echo
 echo "Install complete."
 echo "Next steps:"
-echo "1. Start the extension with: cd ${REPO_ROOT}/raycast-extension && ray develop"
+echo "1. Wait a few seconds for Raycast to load the extension"
 echo "2. Open Raycast and run: Manage Hook Sounds"
 echo "3. Confirm Needs Input and Done use the bundled Claude sounds"

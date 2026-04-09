@@ -18,18 +18,38 @@ It intentionally does not ship Codex integration until Codex exposes native hook
 
 ## Install
 
+Requirements:
+
+- macOS
+- Raycast app already installed
+- Node.js and `npm`
+
+One-command install:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
 ```
 
-Then start the extension:
+This will:
+
+- download the latest release bundle
+- install it into `~/.ai-hook-notifier`
+- back up and merge Claude / Gemini hook settings
+- install Raycast extension dependencies
+- start the extension in the background
+- open Raycast
+
+After Raycast opens:
+
+1. Run `Manage Hook Sounds`
+2. Confirm `Needs Input` and `Done` are configured
+
+If you ever need to start the extension again manually:
 
 ```bash
 cd ~/.ai-hook-notifier/raycast-extension
-ray develop
+npm run dev -- --non-interactive --exit-on-error
 ```
-
-After Raycast opens, run `Manage Hook Sounds`.
 
 <details>
 <summary>AI-Friendly Install Prompt</summary>
@@ -40,11 +60,11 @@ If another AI assistant is helping with setup, tell it:
 Install AI Hook Notifier with:
 curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
 
-Then start Raycast development mode with:
-cd ~/.ai-hook-notifier/raycast-extension && ray develop
-
 Do not replace the entire Claude or Gemini settings file.
 Only merge the required hooks configuration.
+
+If the extension needs to be started manually, use:
+cd ~/.ai-hook-notifier/raycast-extension && npm run dev -- --non-interactive --exit-on-error
 ```
 
 </details>

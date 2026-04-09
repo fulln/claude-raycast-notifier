@@ -51,5 +51,5 @@ unzip -q "${TMP_DIR}/bundle.zip" -d "${INSTALL_DIR}"
 
 echo
 echo "Bootstrap complete."
-echo "Open Raycast, then run:"
-echo "  cd ${INSTALL_DIR}/raycast-extension && ray develop"
+echo "Raycast should open automatically."
+echo "If it does not, open Raycast and run: Manage Hook Sounds"
