@@ -25,7 +25,7 @@ async function main() {
     throw new Error(`Tag ${tag} already exists`);
   }
 
-  await run("git", ["tag", tag]);
+  await run("git", ["tag", "-a", tag, "-m", `Release ${tag}`]);
   console.log(`Created tag ${tag}`);
   console.log(`Push it with: git push origin ${tag}`);
 }
