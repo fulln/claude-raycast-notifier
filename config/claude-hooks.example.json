@@ -21,6 +21,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/fulln/.claude/bin/claude-raycast-notifier/hooks/claude-ask-user-question-bridge.mjs 2>/dev/null || true"
+          }
+        ]
+      }
     ]
   }
 }

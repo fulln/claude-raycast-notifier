@@ -22,6 +22,17 @@ This example wires:
 
 - `Elicitation` -> `needs_input`
 - `Stop` -> `done`
+- `PreToolUse` with matcher `AskUserQuestion` -> interactive Raycast answer handoff
+
+Interactive answer handoff via Raycast is documented separately in
+[docs/claude-code-raycast-input-feasibility.md](/Users/fulln/opensource/claude-raycast-notifier/docs/claude-code-raycast-input-feasibility.md).
+The repository now ships a dedicated Claude question bridge for this path.
+
+For a local mock roundtrip without opening Raycast, run:
+
+```bash
+npm run mock:ask-user-question:auto
+```
 
 ## Gemini CLI
 
@@ -38,6 +49,7 @@ as the starting point.
 
 This example wires:
 
+- `BeforeTool` with matcher `ask_user` -> [hooks/gemini-ask-user-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/gemini-ask-user-bridge.mjs)
 - `Notification` -> `needs_input` via [hooks/gemini-notification-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/gemini-notification-bridge.mjs)
 - `AfterAgent` -> `done` via [hooks/gemini-after-agent-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/gemini-after-agent-bridge.mjs)
 
@@ -46,6 +58,7 @@ Notes:
 - Gemini expects hooks in `.gemini/settings.json` or `~/.gemini/settings.json`
 - Hook commands receive JSON on `stdin`
 - Hook commands must emit only JSON on `stdout`
+- The `ask_user` bridge is currently experimental: it routes the prompt through Raycast, then returns the collected answer through Gemini's hook denial channel as structured JSON text
 
 ## GitHub Copilot
 

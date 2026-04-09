@@ -12,6 +12,9 @@
     "build:extension": "npm --prefix raycast-extension run build",
     "publish:store": "npm --prefix raycast-extension run publish",
     "mock:needs-input": "node hooks/mock-event.mjs needs_input | node hooks/claude-event-bridge.mjs",
+    "mock:ask-user-question": "node hooks/mock-event.mjs ask_user_question | node hooks/claude-ask-user-question-bridge.mjs",
+    "mock:gemini-ask-user": "node hooks/mock-event.mjs gemini_ask_user | node hooks/gemini-ask-user-bridge.mjs",
+    "mock:ask-user-question:auto": "node scripts/mock-ask-user-question-roundtrip.mjs",
     "mock:failure": "node hooks/mock-event.mjs failure | node hooks/claude-event-bridge.mjs",
     "mock:done": "node hooks/mock-event.mjs done | node hooks/claude-event-bridge.mjs",
     "mock:success": "node hooks/mock-event.mjs success | node hooks/claude-event-bridge.mjs"

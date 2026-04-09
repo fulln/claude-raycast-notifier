@@ -23,9 +23,14 @@ not expose a stable external hook surface that this project can target.
 
 Requirements:
 
-- macOS
-- Raycast app already installed
 - Node.js and `npm`
+
+Platform support:
+
+- macOS: full install with hooks, Raycast UI, and extension startup
+- Linux: hook-only install; Raycast UI is skipped
+- Native Windows: not supported by the installer
+- Raycast app is required only for the macOS UI experience
 
 One-command install:
 
@@ -39,19 +44,30 @@ This will:
 - download the latest release bundle
 - install it into `~/.ai-hook-notifier`
 - back up and merge Claude / Gemini hook settings
-- enable voice notifications immediately through Claude / Gemini hooks
-- detect Raycast and set up visual sound management only when Raycast is installed
+- enable the hook bridge immediately through Claude / Gemini hooks
+- on macOS, detect Raycast and set up visual sound management only when Raycast is installed
+- on Linux, stop after hook installation and skip Raycast startup
 
-If Raycast is installed:
+On macOS with Raycast installed:
 
 1. Run `Manage Hook Sounds`
 2. Confirm `Needs Input` and `Done` are configured
 
-If Raycast is not installed:
+If you install the Raycast extension directly instead of using the bootstrap
+script, run `Setup Hooks` once from Raycast. That command checks
+`~/.claude/settings.json` and `~/.gemini/settings.json`, copies the bundled hook
+runtime into `~/.claude-raycast-notifier/generated-hooks`, and writes the
+required hook entries for Claude and Gemini.
 
-- voice notifications still work
+On Linux or macOS without Raycast:
+
+- the hook bridge still works
 - the installer prints the exact Claude / Gemini config paths it updated
 - managed sound data lives under `~/.claude-raycast-notifier`
+
+On native Windows:
+
+- the installer exits early with an unsupported-platform message
 
 If you ever need to start the extension again manually:
 
@@ -69,6 +85,11 @@ If another AI assistant is helping with setup, tell it:
 Install AI Hook Notifier with:
 curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
 
+Expect platform-specific behavior:
+- macOS: full install with Raycast support
+- Linux: hook-only install
+- native Windows: unsupported
+
 Do not replace the entire Claude or Gemini settings file.
 Only merge the required hooks configuration.
 
@@ -83,49 +104,67 @@ cd ~/.ai-hook-notifier/raycast-extension && npm run dev -- --non-interactive --e
 ### Claude Code
 
 The installer writes Claude hooks automatically.
+The repository now ships both the notification bridge and a first pass at
+Raycast answer handoff for Claude Code. Background and design notes live in
+[docs/claude-code-raycast-input-feasibility.md](/Users/fulln/opensource/claude-raycast-notifier/docs/claude-code-raycast-input-feasibility.md).
 
 If you want to configure them manually, use:
+
 - [config/claude-hooks.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/claude-hooks.example.json)
 
 Mapping:
+
 - `Elicitation` -> `Needs Input`
 - `Stop` -> `Done`
+- `PreToolUse` with matcher `AskUserQuestion` -> `Answer Claude Question` in Raycast
 
 ### Gemini CLI
 
 The installer writes Gemini hooks automatically.
 
 If you want to configure them manually, use:
+
 - [config/gemini-settings.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/gemini-settings.example.json)
 
 Mapping:
+
+- `BeforeTool` with matcher `ask_user` -> `Answer Claude Question` in Raycast
 - `Notification` -> `Needs Input`
 - `AfterAgent` -> `Done`
+
+Current limitation:
+
+- Gemini `ask_user` is wired experimentally through hooks. Raycast can collect the answer, but Gemini receives it back through the hook denial/reason channel rather than a Claude-style native `updatedInput.answers` path.
 
 ### GitHub Copilot
 
 Copilot has official hooks, but they are session-oriented.
 
 If you want to configure them manually, use:
+
 - [config/copilot-hooks.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/copilot-hooks.example.json)
 
 Mapping:
+
 - `sessionEnd` with `reason: complete` -> `Done`
 
 Current limitation:
+
 - Copilot does not expose a first-class `Needs Input` hook in the documented hook surface, so this repository only maps `Done`
 
 ## What it does
 
 - Plays a sound when the AI needs your input
 - Plays a sound when the AI finishes
-- Shows a compact macOS notification
+- Shows a compact macOS notification when the platform supports it
 - Keeps the notification content minimal: provider + `Needs Input` / `Done`
 
 ## Raycast commands
 
 - `Manage Hook Sounds`: configure the two semantic sounds
+- `Setup Hooks`: check Claude / Gemini hook health and install hook config from Raycast
 - `Notify AI Event`: internal callback command used by the hook bridges
+- `Answer Claude Question`: internal callback command used by the Claude `AskUserQuestion` hook bridge
 
 ## Sounds
 
@@ -147,6 +186,21 @@ Run the checks locally:
 npm test
 npm --prefix raycast-extension run lint
 npm --prefix raycast-extension run build
+```
+
+Demo the new Claude question bridge:
+
+```bash
+npm run mock:ask-user-question:auto
+```
+
+That command runs a full mock roundtrip without opening Raycast and prints the
+`updatedInput.answers` payload that would go back to Claude Code.
+
+To try the real Raycast flow instead, start the extension dev session and run:
+
+```bash
+npm run mock:ask-user-question
 ```
 
 ## Release

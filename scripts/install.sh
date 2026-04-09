@@ -8,8 +8,10 @@ NOTIFIER_DIR="${HOME}/.claude-raycast-notifier"
 CLAUDE_SETTINGS="${CLAUDE_DIR}/settings.json"
 GEMINI_SETTINGS="${GEMINI_DIR}/settings.json"
 TIMESTAMP="$(date +%Y%m%d-%H%M%S)"
+PLATFORM_MODE="${AI_HOOK_NOTIFIER_PLATFORM_MODE:-full}"
 
 echo "Installing AI Hook Notifier from: ${REPO_ROOT}"
+echo "Platform mode: ${PLATFORM_MODE}"
 
 mkdir -p "${CLAUDE_DIR}/backups" "${GEMINI_DIR}/backups"
 
@@ -81,6 +83,14 @@ echo "Claude hook config: ${CLAUDE_SETTINGS}"
 echo "Gemini hook config: ${GEMINI_SETTINGS}"
 echo "Notifier data directory: ${NOTIFIER_DIR}"
 
+if [ "${PLATFORM_MODE}" != "full" ]; then
+  echo
+  echo "Hook-only mode is active."
+  echo "Claude and Gemini hooks were installed."
+  echo "Raycast UI and extension startup are only supported on macOS."
+  exit 0
+fi
+
 if has_raycast; then
   if ! command -v npm >/dev/null 2>&1; then
     echo
@@ -113,5 +123,5 @@ else
   echo
   echo "Raycast is not installed."
   echo "Voice notifications are already enabled through Claude/Gemini hooks."
-  echo "You can install Raycast later to manage sounds visually."
+  echo "You can install Raycast later on macOS to manage sounds visually."
 fi
