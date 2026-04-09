@@ -28,9 +28,9 @@ test("resolveSoundForEvent returns an existing file for an enabled slot", async 
   );
 
   assert.equal(playback.reason, null);
-  assert.equal(playback.soundId, "focus-bell");
+  assert.equal(playback.soundId, "claude-ready-to-work");
   assert.equal(playback.slot, "needs_input");
-  assert.match(playback.filePath, /focus-bell\.wav$/);
+  assert.match(playback.filePath, /readytowork\.mp3$/);
 });
 
 test("resolveSoundForEvent returns null filePath for a disabled slot", async () => {

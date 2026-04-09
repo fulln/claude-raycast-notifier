@@ -10,6 +10,12 @@
       "durationMs": 220
     },
     {
+      "id": "claude-ready-to-work",
+      "label": "Claude Ready To Work",
+      "kind": "bundled",
+      "filename": "readytowork.mp3"
+    },
+    {
       "id": "soft-alert",
       "label": "Soft Alert",
       "kind": "bundled",
@@ -26,6 +32,12 @@
       "durationMs": 260
     },
     {
+      "id": "claude-jobs-done",
+      "label": "Claude Jobs Done",
+      "kind": "bundled",
+      "filename": "jobs_done.mp3"
+    },
+    {
       "id": "bright-success",
       "label": "Bright Success",
       "kind": "bundled",
@@ -36,7 +48,7 @@
   ],
   "defaults": {
     "needs_input": {
-      "soundId": "focus-bell",
+      "soundId": "claude-ready-to-work",
       "enabled": true
     },
     "failure": {
@@ -44,7 +56,7 @@
       "enabled": true
     },
     "done": {
-      "soundId": "gentle-finish",
+      "soundId": "claude-jobs-done",
       "enabled": true
     },
     "success": {

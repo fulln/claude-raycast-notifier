@@ -71,7 +71,7 @@ test("ensureUserData seeds bundled sounds and default mappings", async () => {
   for (const slot of ["needs_input", "failure", "done", "success", "running"]) {
     assert.ok(mappings.slots[slot] !== undefined, `mappings.slots should have slot '${slot}'`);
   }
-  assert.equal(mappings.slots.needs_input.soundId, "focus-bell");
+  assert.equal(mappings.slots.needs_input.soundId, "claude-ready-to-work");
   assert.equal(mappings.slots.needs_input.enabled, true);
 });
 
