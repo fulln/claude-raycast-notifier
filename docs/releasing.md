@@ -1,16 +1,13 @@
 # Releasing
 
-## Local release flow
-
-1. Run `npm run release -- patch|minor|major "notes"`
-2. Run `npm run release:tag`
-3. Push both commit and tag with `git push origin main --follow-tags`
-
 ## GitHub automation
 
 - CI lives in `.github/workflows/ci.yml` and runs on pushes to `main` and pull requests.
-- GitHub Releases live in `.github/workflows/release.yml` and trigger when you push a semver tag like `v0.2.1`.
-- The release workflow rebuilds the extension, packages `raycast-extension/dist`, and uploads the zip to the GitHub Release page.
+- GitHub Releases live in `.github/workflows/release.yml` and trigger on every push to `main`.
+- The release workflow computes a version in `vYYYY.M.N` form.
+- `YYYY.M` comes from the current UTC year and month.
+- `N` auto-increments within that month based on existing tags.
+- The release workflow rebuilds the extension, creates the tag, packages `raycast-extension/dist`, and uploads the zip to the GitHub Release page.
 
 ## Raycast Store publishing
 

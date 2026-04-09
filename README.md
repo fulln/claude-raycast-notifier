@@ -80,19 +80,14 @@ npm --prefix raycast-extension run build
 
 ## Release
 
-Local release flow:
-
-```bash
-npm run release -- patch "release notes"
-npm run release:tag
-git push origin main --follow-tags
-```
-
 GitHub automation:
 
 - CI runs on pushes to `main` and pull requests
-- GitHub Release runs when a `v*.*.*` tag is pushed
-- The workflow rebuilds the extension and uploads a zip artifact
+- GitHub Release now runs on every push to `main`
+- Each release version is generated automatically as `vYYYY.M.N`
+- `YYYY.M` is the current UTC year and month
+- `N` auto-increments within the same month
+- The workflow rebuilds the extension, creates a tag, and uploads a zip artifact
 
 ## Raycast Store
 
