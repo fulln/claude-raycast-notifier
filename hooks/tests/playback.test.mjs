@@ -54,3 +54,34 @@ test("resolveSoundForEvent returns null filePath for a disabled slot", async () 
   assert.equal(playback.soundId, mappings.slots.failure.soundId);
   assert.equal(playback.slot, "failure");
 });
+
+test("resolveSoundForEvent prefers a hook-specific mapping over the slot fallback", async () => {
+  const rootDir = tempRoot();
+  await ensureUserData({ rootDir, manifestFile, bundledSoundsDir });
+
+  const mappings = await readSoundMappings(rootDir);
+  mappings.hooks = {
+    "claude:stop": {
+      soundId: "bright-success",
+      enabled: true,
+    },
+  };
+  await writeFile(
+    join(rootDir, "sound-mappings.json"),
+    JSON.stringify(mappings, null, 2),
+  );
+
+  const playback = await resolveSoundForEvent(
+    {
+      type: "done",
+      soundSlot: "done",
+      hookKey: "claude:stop",
+    },
+    { rootDir },
+  );
+
+  assert.equal(playback.reason, null);
+  assert.equal(playback.soundId, "bright-success");
+  assert.equal(playback.hookKey, "claude:stop");
+  assert.match(playback.filePath, /bright-success\.wav$/);
+});

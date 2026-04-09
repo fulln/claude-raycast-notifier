@@ -6,15 +6,26 @@ const DEFAULT_SEVERITY = {
   done: "info",
 };
 
+const DEFAULT_RETURN_URLS = {
+  claude: "claude://",
+  gemini: null,
+};
+
+const ATTENTION_TYPES = new Set(["needs_input", "done"]);
+
 export function normalizeEvent(raw = {}, env = process.env) {
+  const source = detectSource(raw, env);
+  const hookEventName = deriveHookEventName(raw, env);
   const type = raw.type ?? env.CLAUDE_HOOK_EVENT_TYPE ?? inferType(raw, env);
-  const title = raw.title ?? defaultTitle(type);
-  const message = raw.message ?? raw.summary ?? "Claude event received";
-  const hookEventName = raw.hook_event_name ?? env.CLAUDE_HOOK_EVENT_NAME ?? null;
+  const title = raw.title ?? defaultTitle(source, type);
+  const message = raw.message ?? raw.summary ?? "AI event received";
   const notificationType = raw.notification_type ?? null;
   const action = extractAction(raw, type, hookEventName);
 
   return {
+    source,
+    hookKey: deriveHookKey(source, type, hookEventName),
+    returnUrl: deriveReturnUrl(raw, env, source),
     type,
     title,
     message,
@@ -40,9 +51,46 @@ export function isActionableEvent(event) {
   return event.action !== null || event.type === "needs_input";
 }
 
+export function shouldNotifyEvent(event) {
+  return isActionableEvent(event) || ATTENTION_TYPES.has(event.type);
+}
+
+function detectSource(raw, env) {
+  const explicit = raw.source ?? env.AI_NOTIFIER_SOURCE;
+  if (typeof explicit === "string" && explicit.length > 0) {
+    return explicit.toLowerCase();
+  }
+  if (env.CLAUDE_HOOK_EVENT_NAME || raw.hook_event_name) return "claude";
+  return "claude";
+}
+
+function deriveHookEventName(raw, env) {
+  const hookEventName =
+    raw.hook_event_name ??
+    raw.hookEventName ??
+    raw.event_name ??
+    raw.eventName ??
+    env.AI_NOTIFIER_HOOK ??
+    env.CLAUDE_HOOK_EVENT_NAME ??
+    null;
+
+  return typeof hookEventName === "string" ? hookEventName : null;
+}
+
+function deriveHookKey(source, type, hookEventName) {
+  return `${source}:${slugify(hookEventName ?? type ?? "running")}`;
+}
+
+function deriveReturnUrl(raw, env, source) {
+  const explicit = raw.returnUrl ?? raw.return_url ?? env.AI_NOTIFIER_RETURN_URL;
+  if (typeof explicit === "string") return explicit;
+  return DEFAULT_RETURN_URLS[source] ?? null;
+}
+
 function inferType(raw, env) {
-  const hookEventName = raw.hook_event_name ?? env.CLAUDE_HOOK_EVENT_NAME;
+  const hookEventName = deriveHookEventName(raw, env);
   if (hookEventName === "Elicitation") return "needs_input";
+  if (hookEventName === "Stop") return "done";
   return "running";
 }
 
@@ -106,10 +154,24 @@ function normalizeOptions(options) {
     .filter(Boolean);
 }
 
-function defaultTitle(type) {
-  if (type === "needs_input") return "Claude needs your input";
-  if (type === "failure") return "Claude hit an error";
-  if (type === "done") return "Claude finished the task";
-  if (type === "success") return "Claude completed the command";
-  return "Claude is working";
+function defaultTitle(source, type) {
+  const subject = source === "claude" ? "Claude" : capitalize(source);
+  if (type === "needs_input") return `${subject} needs your input`;
+  if (type === "failure") return `${subject} hit an error`;
+  if (type === "done") return `${subject} finished the task`;
+  if (type === "success") return `${subject} completed the command`;
+  return `${subject} is working`;
+}
+
+function slugify(value) {
+  return String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "") || "running";
+}
+
+function capitalize(value) {
+  if (!value) return "AI";
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }

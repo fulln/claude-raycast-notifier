@@ -16,7 +16,7 @@ const SOUND_SLOTS: SoundSlot[] = [
   "done",
 ];
 const LIBRARY_VERSION = 1;
-const MAPPINGS_VERSION = 1;
+const MAPPINGS_VERSION = 2;
 
 type Preferences = {
   notifierRootPath: string;
@@ -47,6 +47,7 @@ export type SoundMapping = {
 export type SoundMappings = {
   version: number;
   slots: Record<SoundSlot, SoundMapping>;
+  hooks: Record<string, SoundMapping>;
 };
 
 export type InstallStatus = {
@@ -75,6 +76,7 @@ export async function loadSoundMappings(): Promise<SoundMappings> {
   const parsed = await readJsonFile<Partial<SoundMappings>>(mappingsFile, {
     version: MAPPINGS_VERSION,
     slots: defaultMappings().slots,
+    hooks: {},
   });
 
   return normalizeMappings(parsed.value);
@@ -180,6 +182,7 @@ export async function repairUserData(): Promise<{
         return [slot, manifest.defaults[slot] ?? defaultMapping()];
       }),
     ) as Record<SoundSlot, SoundMapping>,
+    hooks: existingMappings.hooks,
   });
   await writeJsonFile(paths.mappingsFile, mappings);
 
@@ -214,6 +217,7 @@ export async function loadInstallStatus(): Promise<InstallStatus> {
       readJsonFile<Partial<SoundMappings>>(paths.mappingsFile, {
         version: MAPPINGS_VERSION,
         slots: defaultMappings().slots,
+        hooks: {},
       }),
     ]);
 
@@ -244,6 +248,16 @@ export async function loadInstallStatus(): Promise<InstallStatus> {
       }
       if (mapping.soundId && !soundIds.has(mapping.soundId)) {
         missing.push(`${paths.mappingsFile}#${slot}`);
+      }
+    }
+
+    for (const [hookKey, mapping] of Object.entries(mappings.hooks)) {
+      if (mapping.enabled && !mapping.soundId) {
+        missing.push(`${paths.mappingsFile}#${hookKey}:unassigned-enabled`);
+        continue;
+      }
+      if (mapping.soundId && !soundIds.has(mapping.soundId)) {
+        missing.push(`${paths.mappingsFile}#${hookKey}`);
       }
     }
   }
@@ -331,6 +345,7 @@ function normalizeMappings(
   value: Partial<SoundMappings> | undefined,
 ): SoundMappings {
   const slots = value?.slots ?? {};
+  const hooks = value?.hooks ?? {};
 
   return {
     version:
@@ -338,6 +353,11 @@ function normalizeMappings(
     slots: Object.fromEntries(
       SOUND_SLOTS.map((slot) => [slot, normalizeMapping(slots[slot])]),
     ) as Record<SoundSlot, SoundMapping>,
+    hooks: Object.fromEntries(
+      Object.entries(hooks)
+        .filter(([hookKey]) => hookKey.length > 0)
+        .map(([hookKey, mapping]) => [hookKey, normalizeMapping(mapping)]),
+    ),
   };
 }
 
@@ -356,6 +376,7 @@ function defaultMappings(): SoundMappings {
     slots: Object.fromEntries(
       SOUND_SLOTS.map((slot) => [slot, defaultMapping()]),
     ) as Record<SoundSlot, SoundMapping>,
+    hooks: {},
   };
 }
 

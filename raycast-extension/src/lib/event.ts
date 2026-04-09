@@ -20,6 +20,9 @@ export type SoundSlot =
   | "done";
 
 export type ClaudeEvent = {
+  source?: string | null;
+  hookKey?: string | null;
+  returnUrl?: string | null;
   type: SoundSlot;
   title: string;
   message: string;

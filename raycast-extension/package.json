@@ -1,8 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-raycast-notifier",
-  "title": "Claude Hook Sounds",
-  "description": "Manage Claude Code hook sounds and actionable notifications in Raycast.",
+  "version": "0.2.0",
+  "title": "AI Hook Notifier",
+  "description": "Claude and Gemini events in Raycast with sounds and focused notifications.",
   "icon": "icon.png",
   "author": "lee_fulln",
   "license": "MIT",
@@ -12,27 +13,15 @@
   ],
   "commands": [
     {
-      "name": "menu-bar-status",
-      "title": "Claude Status",
-      "description": "Show Claude status, sound setup health, and recent events in the Raycast menu bar",
-      "mode": "menu-bar"
-    },
-    {
       "name": "manage-sounds",
-      "title": "Manage Claude Sounds",
-      "description": "Assign sounds to Claude hook event slots",
-      "mode": "view"
-    },
-    {
-      "name": "sound-library",
-      "title": "Claude Sound Library",
-      "description": "Preview bundled and imported Claude hook sounds",
+      "title": "Manage Hook Sounds",
+      "description": "Manage sounds, install health, and AI hook notifier setup",
       "mode": "view"
     },
     {
       "name": "notify-event",
-      "title": "Notify Claude Event",
-      "description": "Render an actionable Claude event and return you to Claude Code",
+      "title": "Notify AI Event",
+      "description": "Render an actionable AI event and return you to the source app",
       "mode": "no-view",
       "arguments": [
         {

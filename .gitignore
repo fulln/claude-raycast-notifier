@@ -5,3 +5,4 @@ node_modules/
 ~/.claude-raycast-notifier/
 raycast-extension/node_modules/
 raycast-extension/dist/
+releases/

@@ -1,16 +1,5 @@
 {
   "hooks": {
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node /Users/fulln/.claude/bin/claude-raycast-notifier/hooks/claude-event-bridge.mjs 2>/dev/null || true"
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "matcher": "",

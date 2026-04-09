@@ -1,0 +1,32 @@
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "ai-notifier-needs-input",
+            "type": "command",
+            "command": "node /Users/fulln/.claude/bin/claude-raycast-notifier/hooks/gemini-notification-bridge.mjs",
+            "timeout": 5000,
+            "description": "Forward Gemini notifications to Raycast as needs_input alerts."
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "ai-notifier-done",
+            "type": "command",
+            "command": "node /Users/fulln/.claude/bin/claude-raycast-notifier/hooks/gemini-after-agent-bridge.mjs",
+            "timeout": 5000,
+            "description": "Forward Gemini completed turns to Raycast as done alerts."
+          }
+        ]
+      }
+    ]
+  }
+}

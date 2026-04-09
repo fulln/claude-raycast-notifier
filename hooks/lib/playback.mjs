@@ -14,25 +14,26 @@ const execFileAsync = promisify(execFile);
 
 export async function resolveSoundForEvent(event, { rootDir = defaultRootDir() } = {}) {
   const slot = event?.soundSlot ?? event?.type ?? "running";
+  const hookKey = typeof event?.hookKey === "string" ? event.hookKey : null;
   const mappings = await readSoundMappings(rootDir);
   const library = await readSoundLibrary(rootDir);
-  const mapping = mappings.slots?.[slot] ?? null;
+  const mapping = (hookKey ? mappings.hooks?.[hookKey] : null) ?? mappings.slots?.[slot] ?? null;
 
   if (!mapping) {
-    return { slot, soundId: null, filePath: null, reason: "unmapped" };
+    return { slot, hookKey, soundId: null, filePath: null, reason: "unmapped" };
   }
 
   if (!mapping.enabled) {
-    return { slot, soundId: mapping.soundId ?? null, filePath: null, reason: "disabled" };
+    return { slot, hookKey, soundId: mapping.soundId ?? null, filePath: null, reason: "disabled" };
   }
 
   if (!mapping.soundId) {
-    return { slot, soundId: null, filePath: null, reason: "unmapped" };
+    return { slot, hookKey, soundId: null, filePath: null, reason: "unmapped" };
   }
 
   const sound = library.sounds.find((entry) => entry.id === mapping.soundId);
   if (!sound?.filename) {
-    return { slot, soundId: mapping.soundId, filePath: null, reason: "missing_sound" };
+    return { slot, hookKey, soundId: mapping.soundId, filePath: null, reason: "missing_sound" };
   }
 
   const filePath = join(notifierPaths(rootDir).soundsDir, sound.filename);
@@ -40,10 +41,10 @@ export async function resolveSoundForEvent(event, { rootDir = defaultRootDir() }
   try {
     await access(filePath);
   } catch {
-    return { slot, soundId: sound.id, filePath: null, reason: "missing_file" };
+    return { slot, hookKey, soundId: sound.id, filePath: null, reason: "missing_file" };
   }
 
-  return { slot, soundId: sound.id, filePath, reason: null };
+  return { slot, hookKey, soundId: sound.id, filePath, reason: null };
 }
 
 export async function previewSound(filePath) {

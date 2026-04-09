@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { isActionableEvent, normalizeEvent } from "../lib/event-schema.mjs";
+import {
+  isActionableEvent,
+  normalizeEvent,
+  shouldNotifyEvent,
+} from "../lib/event-schema.mjs";
 
 test("normalizeEvent maps needs_input payloads", () => {
   const event = normalizeEvent(
@@ -13,15 +17,11 @@ test("normalizeEvent maps needs_input payloads", () => {
   );
 
   assert.equal(event.type, "needs_input");
+  assert.equal(event.source, "claude");
+  assert.equal(event.hookKey, "claude:needs_input");
   assert.equal(event.severity, "warning");
   assert.equal(event.action, null);
   assert.match(event.timestamp, /^\d{4}-\d{2}-\d{2}T/);
-});
-
-test("normalizeEvent maps failure payloads to error severity", () => {
-  const event = normalizeEvent({ type: "failure", title: "Tests failed" }, {});
-  assert.equal(event.severity, "error");
-  assert.equal(event.action, null);
 });
 
 test("normalizeEvent preserves actionable choice metadata", () => {
@@ -50,36 +50,37 @@ test("normalizeEvent preserves actionable choice metadata", () => {
     submitHint: undefined,
   });
   assert.equal(event.hookEventName, "Elicitation");
+  assert.equal(event.hookKey, "claude:elicitation");
   assert.equal(isActionableEvent(event), true);
+  assert.equal(shouldNotifyEvent(event), true);
 });
 
-test("plain done notifications are not actionable", () => {
+test("done notifications are not actionable but still notify", () => {
   const event = normalizeEvent(
     { type: "done", title: "Claude finished the task" },
     { CLAUDE_HOOK_EVENT_NAME: "Stop" },
   );
 
   assert.equal(isActionableEvent(event), false);
+  assert.equal(event.hookKey, "claude:stop");
+  assert.equal(shouldNotifyEvent(event), true);
 });
 
-test("normalizeEvent marks elicitation payloads as needs_input with a needs_input sound slot", () => {
+test("normalizeEvent supports explicit gemini source and returnUrl", () => {
   const event = normalizeEvent(
     {
-      type: "needs_input",
-      title: "Pick one",
-      message: "Choose how to proceed",
-      prompt: "Select an option",
-      options: [
-        { label: "Approve", value: "approve" },
-        { label: "Decline", value: "decline" },
-      ],
+      source: "gemini",
+      type: "done",
+      returnUrl: "gemini://",
+      title: "Gemini finished the task",
     },
-    { CLAUDE_HOOK_EVENT_NAME: "Elicitation" },
+    { AI_NOTIFIER_HOOK: "done" },
   );
 
-  assert.equal(event.soundSlot, "needs_input");
-  assert.equal(event.action?.kind, "choice");
-  assert.equal(isActionableEvent(event), true);
+  assert.equal(event.source, "gemini");
+  assert.equal(event.hookKey, "gemini:done");
+  assert.equal(event.returnUrl, "gemini://");
+  assert.equal(shouldNotifyEvent(event), true);
 });
 
 test("normalizeEvent maps failure payloads to the failure sound slot", () => {
@@ -87,4 +88,5 @@ test("normalizeEvent maps failure payloads to the failure sound slot", () => {
 
   assert.equal(event.soundSlot, "failure");
   assert.equal(event.severity, "error");
+  assert.equal(shouldNotifyEvent(event), false);
 });

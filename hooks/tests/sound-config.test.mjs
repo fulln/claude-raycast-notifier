@@ -99,6 +99,7 @@ test("ensureUserData returns { paths, library, mappings }", async () => {
   assert.ok(result.paths?.soundsDir, "result.paths.soundsDir should be set");
   assert.ok(Array.isArray(result.library?.sounds), "result.library.sounds should be array");
   assert.ok(result.mappings?.slots?.needs_input, "result.mappings.slots.needs_input should exist");
+  assert.deepEqual(result.mappings?.hooks, {});
 });
 
 // ---------------------------------------------------------------------------
@@ -114,17 +115,22 @@ test("readSoundLibrary returns { version: 1, sounds: [] } when file is missing",
 test("readSoundMappings returns versioned slots fallback when file is missing", async () => {
   const root = tempRoot();
   const mappings = await readSoundMappings(root);
-  assert.equal(mappings.version, 1);
+  assert.equal(mappings.version, 2);
   for (const slot of ["needs_input", "failure", "done", "success", "running"]) {
     assert.ok(mappings.slots[slot] !== undefined, `missing slot ${slot}`);
     assert.equal(mappings.slots[slot].soundId, null);
     assert.equal(mappings.slots[slot].enabled, false);
   }
+  assert.deepEqual(mappings.hooks, {});
 });
 
 test("writeSoundMappings persists and readSoundMappings retrieves", async () => {
   const root = tempRoot();
-  const data = { version: 1, slots: { done: { soundId: "focus-bell", enabled: true } } };
+  const data = {
+    version: 2,
+    slots: { done: { soundId: "focus-bell", enabled: true } },
+    hooks: { "claude:stop": { soundId: "bright-success", enabled: true } },
+  };
 
   await writeSoundMappings(root, data);
   const result = await readSoundMappings(root);

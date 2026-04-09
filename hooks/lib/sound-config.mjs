@@ -115,7 +115,7 @@ export async function readSoundLibrary(rootDir = defaultRootDir()) {
 export async function readSoundMappings(rootDir = defaultRootDir()) {
   const { mappingsFile } = notifierPaths(rootDir);
   return readJsonFile(mappingsFile, {
-    version: 1,
+    version: 2,
     slots: {
       needs_input: { soundId: null, enabled: false },
       failure: { soundId: null, enabled: false },
@@ -123,6 +123,7 @@ export async function readSoundMappings(rootDir = defaultRootDir()) {
       success: { soundId: null, enabled: false },
       running: { soundId: null, enabled: false },
     },
+    hooks: {},
   });
 }
 
@@ -196,7 +197,7 @@ export async function ensureUserData({
     for (const slot of SLOTS) {
       slots[slot] = manifest.defaults?.[slot] ?? { soundId: null, enabled: false };
     }
-    await writeJsonFile(paths.mappingsFile, { version: 1, slots });
+    await writeJsonFile(paths.mappingsFile, { version: 2, slots, hooks: {} });
   }
 
   return {

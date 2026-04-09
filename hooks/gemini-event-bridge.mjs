@@ -1,3 +1,3 @@
 import { main } from "./ai-event-bridge.mjs";
 
-await main({ source: "claude" });
+await main({ source: "gemini" });
