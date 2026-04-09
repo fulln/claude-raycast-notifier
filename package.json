@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "generate:sounds": "node scripts/generate-default-sounds.mjs",
+    "test": "npm run test:hooks && npm run test:extension",
     "test:hooks": "node --test hooks/tests/*.test.mjs",
+    "test:extension": "node --test raycast-extension/tests/*.test.mjs",
     "lint:extension": "npm --prefix raycast-extension run lint",
     "build:extension": "npm --prefix raycast-extension run build",
     "publish:store": "npm --prefix raycast-extension run publish",

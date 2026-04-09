@@ -33,7 +33,7 @@ async function main() {
   await writeJson(rootPackagePath, rootPackage);
 
   try {
-    await run("npm", ["run", "test:hooks"], repoRoot);
+    await run("npm", ["test"], repoRoot);
     await run("npm", ["run", "lint:extension"], repoRoot);
     await run("npm", ["run", "build:extension"], repoRoot);
   } catch (error) {
