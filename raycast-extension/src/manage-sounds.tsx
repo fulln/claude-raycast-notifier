@@ -355,10 +355,15 @@ function HookSoundForm(props: {
 }
 
 async function loadManageSoundsData() {
-  const [mappings, library, status] = await Promise.all([
+  let status = await loadInstallStatus();
+  if (!status.healthy) {
+    await repairUserData();
+    status = await loadInstallStatus();
+  }
+
+  const [mappings, library] = await Promise.all([
     loadSoundMappings(),
     loadSoundLibrary(),
-    loadInstallStatus(),
   ]);
 
   return {

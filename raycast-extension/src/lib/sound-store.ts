@@ -371,10 +371,15 @@ function normalizeMapping(
 }
 
 function defaultMappings(): SoundMappings {
+  const manifest = defaultSoundPack();
+
   return {
     version: MAPPINGS_VERSION,
     slots: Object.fromEntries(
-      SOUND_SLOTS.map((slot) => [slot, defaultMapping()]),
+      SOUND_SLOTS.map((slot) => [
+        slot,
+        manifest.defaults?.[slot] ?? defaultMapping(),
+      ]),
     ) as Record<SoundSlot, SoundMapping>,
     hooks: {},
   };
@@ -408,6 +413,11 @@ function defaultSoundPack(): DefaultSoundPack {
         durationMs: 220,
       },
       {
+        id: "claude-ready-to-work",
+        label: "Claude Ready To Work",
+        filename: "readytowork.mp3",
+      },
+      {
         id: "soft-alert",
         label: "Soft Alert",
         filename: "soft-alert.wav",
@@ -422,6 +432,11 @@ function defaultSoundPack(): DefaultSoundPack {
         durationMs: 260,
       },
       {
+        id: "claude-jobs-done",
+        label: "Claude Jobs Done",
+        filename: "jobs_done.mp3",
+      },
+      {
         id: "bright-success",
         label: "Bright Success",
         filename: "bright-success.wav",
@@ -430,9 +445,9 @@ function defaultSoundPack(): DefaultSoundPack {
       },
     ],
     defaults: {
-      needs_input: { soundId: "focus-bell", enabled: true },
+      needs_input: { soundId: "claude-ready-to-work", enabled: true },
       failure: { soundId: "soft-alert", enabled: true },
-      done: { soundId: "gentle-finish", enabled: true },
+      done: { soundId: "claude-jobs-done", enabled: true },
       success: { soundId: "bright-success", enabled: false },
       running: { soundId: null, enabled: false },
     },
