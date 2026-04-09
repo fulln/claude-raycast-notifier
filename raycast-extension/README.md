@@ -47,7 +47,7 @@ Requirements:
 Install with:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
+AI_HOOK_NOTIFIER_DIR="${HOME}/.ai-hook-notifier"; TMP_DIR="$(mktemp -d)"; ASSET_URL="$(curl -fsSL https://api.github.com/repos/fulln/claude-raycast-notifier/releases/latest | python3 -c 'import json,sys; assets=json.load(sys.stdin).get("assets", []); print(next(asset["browser_download_url"] for asset in assets if "ai-hook-notifier-bundle-" in asset.get("browser_download_url","") and asset["browser_download_url"].endswith(".zip")))' )"; curl -fL "$ASSET_URL" -o "$TMP_DIR/bundle.zip"; rm -rf "$AI_HOOK_NOTIFIER_DIR"; mkdir -p "$AI_HOOK_NOTIFIER_DIR"; unzip -q "$TMP_DIR/bundle.zip" -d "$AI_HOOK_NOTIFIER_DIR"; bash "$AI_HOOK_NOTIFIER_DIR/scripts/install.sh"; rm -rf "$TMP_DIR"
 ```
 
 This downloads the latest install bundle release and installs it into `~/.ai-hook-notifier`.
