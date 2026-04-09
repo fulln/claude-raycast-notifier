@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   isActionableEvent,
   normalizeEvent,
+  shouldOpenRaycast,
   shouldNotifyEvent,
 } from "../lib/event-schema.mjs";
 
@@ -64,6 +65,7 @@ test("done notifications are not actionable but still notify", () => {
   assert.equal(isActionableEvent(event), false);
   assert.equal(event.hookKey, "claude:stop");
   assert.equal(shouldNotifyEvent(event), true);
+  assert.equal(shouldOpenRaycast(event), false);
 });
 
 test("normalizeEvent supports explicit gemini source and returnUrl", () => {
@@ -81,6 +83,7 @@ test("normalizeEvent supports explicit gemini source and returnUrl", () => {
   assert.equal(event.hookKey, "gemini:done");
   assert.equal(event.returnUrl, "gemini://");
   assert.equal(shouldNotifyEvent(event), true);
+  assert.equal(shouldOpenRaycast(event), false);
 });
 
 test("normalizeEvent maps failure payloads to the failure sound slot", () => {
@@ -89,4 +92,18 @@ test("normalizeEvent maps failure payloads to the failure sound slot", () => {
   assert.equal(event.soundSlot, "failure");
   assert.equal(event.severity, "error");
   assert.equal(shouldNotifyEvent(event), false);
+  assert.equal(shouldOpenRaycast(event), false);
+});
+
+test("choice events notify without forcing Raycast to open", () => {
+  const event = normalizeEvent(
+    {
+      type: "needs_input",
+      options: [{ label: "Approve", value: "approve" }],
+    },
+    { CLAUDE_HOOK_EVENT_NAME: "Elicitation" },
+  );
+
+  assert.equal(shouldNotifyEvent(event), true);
+  assert.equal(shouldOpenRaycast(event), false);
 });

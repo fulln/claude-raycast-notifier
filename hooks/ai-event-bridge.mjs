@@ -1,5 +1,6 @@
 import {
   normalizeEvent,
+  shouldOpenRaycast,
   shouldNotifyEvent,
 } from "./lib/event-schema.mjs";
 import { compactEvent } from "./lib/event-summary.mjs";
@@ -64,9 +65,13 @@ export async function runEventBridge({
   });
 
   if (shouldNotify) {
-    try {
-      await triggerRaycast(displayEvent);
-    } catch {
+    if (shouldOpenRaycast(displayEvent)) {
+      try {
+        await triggerRaycast(displayEvent);
+      } catch {
+        await showMacNotification(displayEvent.title, displayEvent.message);
+      }
+    } else {
       await showMacNotification(displayEvent.title, displayEvent.message);
     }
   }

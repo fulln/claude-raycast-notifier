@@ -55,6 +55,10 @@ export function shouldNotifyEvent(event) {
   return isActionableEvent(event) || ATTENTION_TYPES.has(event.type);
 }
 
+export function shouldOpenRaycast(event) {
+  return false;
+}
+
 function detectSource(raw, env) {
   const explicit = raw.source ?? env.AI_NOTIFIER_SOURCE;
   if (typeof explicit === "string" && explicit.length > 0) {
