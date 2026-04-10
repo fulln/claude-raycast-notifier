@@ -92,11 +92,27 @@ Antigravity support.
 
 ## Codex CLI
 
-Codex support is intentionally not shipped right now.
+Codex support is experimental and intentionally minimal.
 
-As verified locally on April 9, 2026 against `codex-cli 0.118.0`, Codex CLI
-still exposes no native hook configuration. Until upstream hooks exist, this
-repository does not wire Codex events into the shared notifier flow.
+As verified against the official OpenAI Codex hooks docs on April 10, 2026,
+Codex hooks are experimental, currently disabled on Windows, and `PreToolUse`
+only supports `Bash`. This repository therefore only wires the documented
+minimal path:
+
+- `Stop` -> `done` via [hooks/codex-stop-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/codex-stop-bridge.mjs)
+- `PreToolUse` with matcher `Bash` -> risky-command reminder via [hooks/codex-pretool-bash-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/codex-pretool-bash-bridge.mjs)
+
+Manual config example:
+
+- [config/codex-hooks.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/codex-hooks.example.json)
+
+Important limitations:
+
+- No Raycast question-answer handoff yet
+- No MCP / Write / WebSearch interception through Codex hooks today
+- You must also enable the Codex feature flag in `config.toml`:
+  - `[features]`
+  - `codex_hooks = true`
 
 ## Runtime bridge files
 
@@ -106,3 +122,5 @@ repository does not wire Codex events into the shared notifier flow.
 - Gemini notification bridge: [hooks/gemini-notification-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/gemini-notification-bridge.mjs)
 - Gemini completion bridge: [hooks/gemini-after-agent-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/gemini-after-agent-bridge.mjs)
 - Copilot completion bridge: [hooks/copilot-session-end-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/copilot-session-end-bridge.mjs)
+- Codex completion bridge: [hooks/codex-stop-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/codex-stop-bridge.mjs)
+- Codex Bash reminder bridge: [hooks/codex-pretool-bash-bridge.mjs](/Users/fulln/opensource/claude-raycast-notifier/hooks/codex-pretool-bash-bridge.mjs)

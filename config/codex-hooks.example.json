@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/fulln/.ai-hook-notifier/hooks/codex-pretool-bash-bridge.mjs",
+            "statusMessage": "Checking Codex Bash command"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node /Users/fulln/.ai-hook-notifier/hooks/codex-stop-bridge.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}

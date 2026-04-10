@@ -38,7 +38,7 @@ test("install hook-only mode writes merged settings and skips Raycast startup", 
   });
 
   assert.match(stdout, /Hook-only mode is active\./);
-  assert.match(stdout, /Claude and Gemini hooks were installed\./);
+  assert.match(stdout, /Claude, Gemini, and Codex hooks were installed\./);
   assert.doesNotMatch(stdout, /Started Raycast develop session in background/);
 
   const claudeSettings = JSON.parse(
@@ -47,9 +47,19 @@ test("install hook-only mode writes merged settings and skips Raycast startup", 
   const geminiSettings = JSON.parse(
     await readFile(path.join(homeDir, ".gemini/settings.json"), "utf8"),
   );
+  const codexHooks = JSON.parse(
+    await readFile(path.join(homeDir, ".codex/hooks.json"), "utf8"),
+  );
+  const codexConfig = await readFile(
+    path.join(homeDir, ".codex/config.toml"),
+    "utf8",
+  );
 
   assert.ok(claudeSettings.hooks.Stop);
   assert.ok(claudeSettings.hooks.Elicitation);
   assert.ok(geminiSettings.hooks.Notification);
   assert.ok(geminiSettings.hooks.AfterAgent);
+  assert.ok(codexHooks.hooks.PreToolUse);
+  assert.ok(codexHooks.hooks.Stop);
+  assert.match(codexConfig, /\[features\][\s\S]*codex_hooks = true/);
 });

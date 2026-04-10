@@ -13,9 +13,9 @@ Today this repository supports:
 
 - Claude Code
 - Gemini CLI
+- Codex CLI (experimental minimal support)
 - GitHub Copilot (`Done` only)
 
-It intentionally does not ship Codex integration until Codex exposes native hooks.
 It also does not currently ship Antigravity integration because Antigravity does
 not expose a stable external hook surface that this project can target.
 
@@ -50,8 +50,8 @@ This will:
 - download a small bootstrap script
 - download the latest release bundle
 - install it into `~/.ai-hook-notifier`
-- back up and merge Claude / Gemini hook settings
-- enable the hook bridge immediately through Claude / Gemini hooks
+- back up and merge Claude / Gemini / Codex hook settings
+- enable the hook bridge immediately through Claude / Gemini / Codex hooks
 - on macOS, detect Raycast and set up visual sound management only when Raycast is installed
 - on Linux, stop after hook installation and skip Raycast startup
 
@@ -63,7 +63,7 @@ On macOS with Raycast installed:
 On Linux or macOS without Raycast:
 
 - the hook bridge still works
-- the installer prints the exact Claude / Gemini config paths it updated
+- the installer prints the exact Claude / Gemini / Codex config paths it updated
 - managed sound data lives under `~/.claude-raycast-notifier`
 
 On native Windows:
@@ -87,16 +87,18 @@ After installing the extension:
 
 1. Open Raycast
 2. Run `Setup Hooks`
-3. Install `Claude Hooks`, `Gemini Hooks`, or `Install All Hooks`
+3. Install `Claude Hooks`, `Gemini Hooks`, `Codex Hooks`, or `Install All Hooks`
 
 `Setup Hooks` will:
 
 - check `~/.claude/settings.json`
 - check `~/.gemini/settings.json`
+- check `~/.codex/hooks.json`
+- enable `codex_hooks = true` in `~/.codex/config.toml`
 - copy the bundled hook runtime into `~/.claude-raycast-notifier/generated-hooks`
-- merge the required hook entries for Claude and Gemini
+- merge the required hook entries for Claude, Gemini, and Codex
 
-Without that step, the extension can open its commands, but Claude / Gemini
+Without that step, the extension can open its commands, but Claude / Gemini / Codex
 will not automatically send notifications or questions into Raycast.
 
 <details>
@@ -113,7 +115,7 @@ Expect platform-specific behavior:
 - Linux: hook-only install
 - native Windows: unsupported
 
-Do not replace the entire Claude or Gemini settings file.
+Do not replace the entire Claude, Gemini, or Codex settings file.
 Only merge the required hooks configuration.
 
 If the extension needs to be started manually, use:
@@ -175,6 +177,24 @@ Current limitation:
 
 - Copilot does not expose a first-class `Needs Input` hook in the documented hook surface, so this repository only maps `Done`
 
+### Codex CLI
+
+Codex hooks are currently experimental. This repository only wires the minimal
+documented path:
+
+- `Stop` -> `Done`
+- `PreToolUse` with matcher `Bash` -> risky-command reminder
+
+Manual config example:
+
+- [config/codex-hooks.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/codex-hooks.example.json)
+
+Current limitations:
+
+- No Raycast question-answer handoff for Codex yet
+- `PreToolUse` currently only supports `Bash`
+- OpenAI marks Codex hooks as experimental and temporarily disables them on Windows
+
 ## What it does
 
 - Plays a sound when the AI needs your input
@@ -195,6 +215,11 @@ Open `Manage Hook Sounds` in Raycast and set:
 
 - `Needs Input`
 - `Done`
+
+Those two semantic sounds are shared across the currently wired providers:
+
+- `Needs Input`: Claude, Gemini, Codex
+- `Done`: Claude, Gemini, Codex, GitHub Copilot
 
 The repository now bundles the default Claude sounds:
 

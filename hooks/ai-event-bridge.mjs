@@ -34,6 +34,7 @@ export async function runEventBridge({
   rootDir = defaultRootDir(),
   stateFile,
   maxRecent = Number(process.env.CLAUDE_NOTIFIER_MAX_RECENT ?? "10"),
+  writeStdout = true,
 } = {}) {
   const { paths } = await ensureUserData({ rootDir });
   const resolvedStateFile = stateFile ?? paths.stateFile;
@@ -76,7 +77,9 @@ export async function runEventBridge({
     }
   }
 
-  process.stdout.write(JSON.stringify({ current: state.current, playback }));
+  if (writeStdout) {
+    process.stdout.write(JSON.stringify({ current: state.current, playback }));
+  }
   return { current: state.current, playback };
 }
 
